@@ -1,14 +1,9 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 
 import { AuthSidebar } from "./_components/auth-sidebar"
 import { LoginForm } from "./_components/login-form"
 
-export const Route = createFileRoute("/auth/login")({
-	beforeLoad: async ({ context }) => {
-		if (context.session) {
-			throw redirect({ to: "/" })
-		}
-	},
+export const Route = createFileRoute("/_public/auth/login")({
 	component: LoginPage,
 })
 

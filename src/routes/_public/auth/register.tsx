@@ -1,14 +1,9 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 
 import { AuthSidebar } from "./_components/auth-sidebar"
 import { RegisterForm } from "./_components/register-form"
 
-export const Route = createFileRoute("/auth/register")({
-	beforeLoad: async ({ context }) => {
-		if (context.session) {
-			throw redirect({ to: "/" })
-		}
-	},
+export const Route = createFileRoute("/_public/auth/register")({
 	component: RegisterPage,
 })
 

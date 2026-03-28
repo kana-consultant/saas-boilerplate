@@ -12,8 +12,8 @@ import PostHogProvider from "#/libs/posthog/provider"
 import TanStackQueryProvider from "#/libs/tanstack-query/root-provider"
 import TanStackQueryDevtools from "#/libs/tanstack-query/devtools"
 
-import { getLocale } from "#/libs/paraglide/runtime"
-import { getSessionFn } from "#/routes/auth/_server/get-session"
+import { getLocale } from "#/libs/paraglide"
+import { getSessionFn } from "#/routes/_public/auth/_server/get-session"
 
 import appCss from "../styles.css?url"
 
