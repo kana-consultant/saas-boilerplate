@@ -13,11 +13,19 @@ import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
+import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedRolesRouteImport } from './routes/_authenticated/roles'
+import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
+import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PublicAuthRegisterRouteImport } from './routes/_public/auth/register'
 import { Route as PublicAuthLoginRouteImport } from './routes/_public/auth/login'
+import { Route as AuthenticatedOrgSettingsRouteImport } from './routes/_authenticated/org/settings'
+import { Route as AuthenticatedOrgCreateRouteImport } from './routes/_authenticated/org/create'
+import { Route as AuthenticatedOrgAcceptInvitationRouteImport } from './routes/_authenticated/org/accept-invitation'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -36,6 +44,32 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
   id: '/api/$',
   path: '/api/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedRolesRoute = AuthenticatedRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPermissionsRoute =
+  AuthenticatedPermissionsRouteImport.update({
+    id: '/permissions',
+    path: '/permissions',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
@@ -62,11 +96,36 @@ const PublicAuthLoginRoute = PublicAuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => PublicRoute,
 } as any)
+const AuthenticatedOrgSettingsRoute =
+  AuthenticatedOrgSettingsRouteImport.update({
+    id: '/org/settings',
+    path: '/org/settings',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrgCreateRoute = AuthenticatedOrgCreateRouteImport.update({
+  id: '/org/create',
+  path: '/org/create',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedOrgAcceptInvitationRoute =
+  AuthenticatedOrgAcceptInvitationRouteImport.update({
+    id: '/org/accept-invitation',
+    path: '/org/accept-invitation',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/me': typeof AuthenticatedMeRoute
+  '/permissions': typeof AuthenticatedPermissionsRoute
+  '/roles': typeof AuthenticatedRolesRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/users': typeof AuthenticatedUsersRoute
   '/api/$': typeof ApiSplatRoute
+  '/org/accept-invitation': typeof AuthenticatedOrgAcceptInvitationRoute
+  '/org/create': typeof AuthenticatedOrgCreateRoute
+  '/org/settings': typeof AuthenticatedOrgSettingsRoute
   '/auth/login': typeof PublicAuthLoginRoute
   '/auth/register': typeof PublicAuthRegisterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -75,7 +134,15 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/me': typeof AuthenticatedMeRoute
+  '/permissions': typeof AuthenticatedPermissionsRoute
+  '/roles': typeof AuthenticatedRolesRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/users': typeof AuthenticatedUsersRoute
   '/api/$': typeof ApiSplatRoute
+  '/org/accept-invitation': typeof AuthenticatedOrgAcceptInvitationRoute
+  '/org/create': typeof AuthenticatedOrgCreateRoute
+  '/org/settings': typeof AuthenticatedOrgSettingsRoute
   '/auth/login': typeof PublicAuthLoginRoute
   '/auth/register': typeof PublicAuthRegisterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -87,7 +154,15 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/me': typeof AuthenticatedMeRoute
+  '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
+  '/_authenticated/roles': typeof AuthenticatedRolesRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/api/$': typeof ApiSplatRoute
+  '/_authenticated/org/accept-invitation': typeof AuthenticatedOrgAcceptInvitationRoute
+  '/_authenticated/org/create': typeof AuthenticatedOrgCreateRoute
+  '/_authenticated/org/settings': typeof AuthenticatedOrgSettingsRoute
   '/_public/auth/login': typeof PublicAuthLoginRoute
   '/_public/auth/register': typeof PublicAuthRegisterRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -98,7 +173,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/me'
+    | '/permissions'
+    | '/roles'
+    | '/settings'
+    | '/users'
     | '/api/$'
+    | '/org/accept-invitation'
+    | '/org/create'
+    | '/org/settings'
     | '/auth/login'
     | '/auth/register'
     | '/api/auth/$'
@@ -107,7 +190,15 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard'
+    | '/me'
+    | '/permissions'
+    | '/roles'
+    | '/settings'
+    | '/users'
     | '/api/$'
+    | '/org/accept-invitation'
+    | '/org/create'
+    | '/org/settings'
     | '/auth/login'
     | '/auth/register'
     | '/api/auth/$'
@@ -118,7 +209,15 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/_public'
     | '/_authenticated/dashboard'
+    | '/_authenticated/me'
+    | '/_authenticated/permissions'
+    | '/_authenticated/roles'
+    | '/_authenticated/settings'
+    | '/_authenticated/users'
     | '/api/$'
+    | '/_authenticated/org/accept-invitation'
+    | '/_authenticated/org/create'
+    | '/_authenticated/org/settings'
     | '/_public/auth/login'
     | '/_public/auth/register'
     | '/api/auth/$'
@@ -164,6 +263,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/users': {
+      id: '/_authenticated/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthenticatedUsersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/roles': {
+      id: '/_authenticated/roles'
+      path: '/roles'
+      fullPath: '/roles'
+      preLoaderRoute: typeof AuthenticatedRolesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/permissions': {
+      id: '/_authenticated/permissions'
+      path: '/permissions'
+      fullPath: '/permissions'
+      preLoaderRoute: typeof AuthenticatedPermissionsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/me': {
+      id: '/_authenticated/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof AuthenticatedMeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -199,15 +333,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicAuthLoginRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/_authenticated/org/settings': {
+      id: '/_authenticated/org/settings'
+      path: '/org/settings'
+      fullPath: '/org/settings'
+      preLoaderRoute: typeof AuthenticatedOrgSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/create': {
+      id: '/_authenticated/org/create'
+      path: '/org/create'
+      fullPath: '/org/create'
+      preLoaderRoute: typeof AuthenticatedOrgCreateRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/org/accept-invitation': {
+      id: '/_authenticated/org/accept-invitation'
+      path: '/org/accept-invitation'
+      fullPath: '/org/accept-invitation'
+      preLoaderRoute: typeof AuthenticatedOrgAcceptInvitationRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMeRoute: typeof AuthenticatedMeRoute
+  AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
+  AuthenticatedRolesRoute: typeof AuthenticatedRolesRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
+  AuthenticatedOrgAcceptInvitationRoute: typeof AuthenticatedOrgAcceptInvitationRoute
+  AuthenticatedOrgCreateRoute: typeof AuthenticatedOrgCreateRoute
+  AuthenticatedOrgSettingsRoute: typeof AuthenticatedOrgSettingsRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMeRoute: AuthenticatedMeRoute,
+  AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
+  AuthenticatedRolesRoute: AuthenticatedRolesRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedUsersRoute: AuthenticatedUsersRoute,
+  AuthenticatedOrgAcceptInvitationRoute: AuthenticatedOrgAcceptInvitationRoute,
+  AuthenticatedOrgCreateRoute: AuthenticatedOrgCreateRoute,
+  AuthenticatedOrgSettingsRoute: AuthenticatedOrgSettingsRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

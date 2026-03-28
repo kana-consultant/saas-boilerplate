@@ -1,3 +1,4 @@
+import { Link, useRouterState } from "@tanstack/react-router"
 import { type Icon } from "@tabler/icons-react"
 
 import {
@@ -17,15 +18,23 @@ export function NavMain({
 		icon?: Icon
 	}[]
 }) {
+	const pathname = useRouterState({ select: (s) => s.location.pathname })
+
 	return (
 		<SidebarGroup>
 			<SidebarGroupContent className="flex flex-col gap-2">
 				<SidebarMenu>
 					{items.map((item) => (
 						<SidebarMenuItem key={item.title}>
-							<SidebarMenuButton tooltip={item.title}>
-								{item.icon && <item.icon />}
-								<span>{item.title}</span>
+							<SidebarMenuButton
+								tooltip={item.title}
+								isActive={pathname === item.url}
+								asChild
+							>
+								<Link to={item.url}>
+									{item.icon && <item.icon />}
+									<span>{item.title}</span>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					))}

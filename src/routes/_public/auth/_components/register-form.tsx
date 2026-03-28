@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { redirect, useRouter } from "@tanstack/react-router"
 import { z } from "zod"
 
@@ -23,13 +24,14 @@ const validate = <K extends keyof typeof registerSchema.shape>(
 
 export const RegisterForm = () => {
 	const router = useRouter()
+	const [formError, setFormError] = useState<string | null>(null)
 
 	const form = useForm({
 		defaultValues: { name: "", email: "", password: "" },
 		onSubmit: async ({ value }) => {
 			const { error } = await authClient.signUp.email(value)
 			if (error) {
-				form.setErrorMap({ onSubmit: error.message ?? "Registration failed" })
+				setFormError(error.message ?? "Registration failed")
 				return
 			}
 			await router.invalidate()
@@ -130,13 +132,9 @@ export const RegisterForm = () => {
 					)}
 				</form.Field>
 
-				<form.Subscribe selector={(s) => s.errorMap.onSubmit}>
-					{(error) =>
-						error ? (
-							<p className="text-sm text-destructive">{String(error)}</p>
-						) : null
-					}
-				</form.Subscribe>
+				{formError && (
+					<p className="text-sm text-destructive">{formError}</p>
+				)}
 
 				<form.Subscribe selector={(s) => ({ isSubmitting: s.isSubmitting, name: s.values.name, email: s.values.email, password: s.values.password })}>
 					{({ isSubmitting, name, email, password }) => (

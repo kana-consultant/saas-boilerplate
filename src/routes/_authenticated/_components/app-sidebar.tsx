@@ -1,17 +1,17 @@
 import * as React from "react"
 import {
-	IconChartBar,
 	IconDashboard,
 	IconDatabase,
 	IconFileWord,
-	IconFolder,
 	IconHelp,
-	IconInnerShadowTop,
-	IconListDetails,
 	IconReport,
 	IconSearch,
 	IconSettings,
+	IconShieldCheck,
+	IconUserCog,
 	IconUsers,
+	IconUsersGroup,
+	IconBuilding,
 } from "@tabler/icons-react"
 
 import {
@@ -19,65 +19,68 @@ import {
 	SidebarContent,
 	SidebarFooter,
 	SidebarHeader,
-	SidebarMenu,
-	SidebarMenuButton,
-	SidebarMenuItem,
 } from "#/components/ui/sidebar"
+import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
+import { useSession } from "#/routes/_public/auth/_hooks/use-session"
+import { useActiveOrganization } from "#/routes/_public/auth/_hooks/use-active-organization"
 import { NavDocuments } from "./nav-documents"
 import { NavMain } from "./nav-main"
 import { NavSecondary } from "./nav-secondary"
 import { NavUser } from "./nav-user"
+import { OrgSwitcher } from "./org-switcher"
 
-const data = {
-	user: {
-		name: "shadcn",
-		email: "m@example.com",
-		avatar: "/avatars/shadcn.jpg",
-	},
-	navMain: [
-		{ title: "Dashboard", url: "#", icon: IconDashboard },
-		{ title: "Lifecycle", url: "#", icon: IconListDetails },
-		{ title: "Analytics", url: "#", icon: IconChartBar },
-		{ title: "Projects", url: "#", icon: IconFolder },
-		{ title: "Team", url: "#", icon: IconUsers },
-	],
-	navSecondary: [
-		{ title: "Settings", url: "#", icon: IconSettings },
-		{ title: "Get Help", url: "#", icon: IconHelp },
-		{ title: "Search", url: "#", icon: IconSearch },
-	],
-	documents: [
-		{ name: "Data Library", url: "#", icon: IconDatabase },
-		{ name: "Reports", url: "#", icon: IconReport },
-		{ name: "Word Assistant", url: "#", icon: IconFileWord },
-	],
-}
+const navSecondary = [
+	{ title: "Settings", url: "/settings", icon: IconSettings },
+	{ title: "Get Help", url: "#", icon: IconHelp },
+	{ title: "Search", url: "#", icon: IconSearch },
+]
+
+const documents = [
+	{ name: "Data Library", url: "#", icon: IconDatabase },
+	{ name: "Reports", url: "#", icon: IconReport },
+	{ name: "Word Assistant", url: "#", icon: IconFileWord },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+	const session = useSession()
+	const canListUsers = useHasPermission("user", ["list"])
+	const { data: activeOrg } = useActiveOrganization()
+
+	const user = {
+		name: session.data?.user?.name ?? "",
+		email: session.data?.user?.email ?? "",
+		avatar: session.data?.user?.image ?? "",
+	}
+
+	const navMain = [
+		{ title: "Dashboard", url: "/dashboard", icon: IconDashboard },
+		...(canListUsers
+			? [
+					{ title: "Users", url: "/users", icon: IconUsers },
+					{ title: "Roles", url: "/roles", icon: IconUserCog },
+					{ title: "Permissions", url: "/permissions", icon: IconShieldCheck },
+				]
+			: []),
+		...(activeOrg
+			? [
+					{ title: "Organization", url: "/org/settings", icon: IconBuilding },
+					{ title: "Members", url: "/org/settings?tab=members", icon: IconUsersGroup },
+				]
+			: []),
+	]
+
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
-				<SidebarMenu>
-					<SidebarMenuItem>
-						<SidebarMenuButton
-							asChild
-							className="data-[slot=sidebar-menu-button]:p-1.5!"
-						>
-							<a href="#">
-								<IconInnerShadowTop className="size-5!" />
-								<span className="text-base font-semibold">Acme Inc.</span>
-							</a>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-				</SidebarMenu>
+				<OrgSwitcher />
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={data.navMain} />
-				<NavDocuments items={data.documents} />
-				<NavSecondary items={data.navSecondary} className="mt-auto" />
+				<NavMain items={navMain} />
+				<NavDocuments items={documents} />
+				<NavSecondary items={navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser user={data.user} />
+				<NavUser user={user} />
 			</SidebarFooter>
 		</Sidebar>
 	)

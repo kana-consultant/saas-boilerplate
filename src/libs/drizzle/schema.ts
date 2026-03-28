@@ -1,9 +1,46 @@
 import {
 	boolean,
 	pgTable,
+	primaryKey,
 	text,
 	timestamp,
 } from "drizzle-orm/pg-core"
+
+export const organization = pgTable("organization", {
+	id: text("id").primaryKey(),
+	name: text("name").notNull(),
+	slug: text("slug").unique(),
+	logo: text("logo"),
+	metadata: text("metadata"),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
+export const member = pgTable("member", {
+	id: text("id").primaryKey(),
+	organizationId: text("organization_id")
+		.notNull()
+		.references(() => organization.id, { onDelete: "cascade" }),
+	userId: text("user_id")
+		.notNull()
+		.references(() => user.id, { onDelete: "cascade" }),
+	role: text("role").notNull().default("member"),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
+export const invitation = pgTable("invitation", {
+	id: text("id").primaryKey(),
+	organizationId: text("organization_id")
+		.notNull()
+		.references(() => organization.id, { onDelete: "cascade" }),
+	email: text("email").notNull(),
+	role: text("role").notNull().default("member"),
+	status: text("status").notNull().default("pending"),
+	expiresAt: timestamp("expires_at").notNull(),
+	inviterId: text("inviter_id").references(() => user.id, {
+		onDelete: "set null",
+	}),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+})
 
 export const user = pgTable("user", {
 	id: text("id").primaryKey(),
@@ -33,6 +70,8 @@ export const session = pgTable("session", {
 		.references(() => user.id, { onDelete: "cascade" }),
 	// admin plugin field
 	impersonatedBy: text("impersonated_by"),
+	// organization plugin field
+	activeOrganizationId: text("active_organization_id"),
 })
 
 export const account = pgTable("account", {
@@ -61,3 +100,23 @@ export const verification = pgTable("verification", {
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").notNull().defaultNow(),
 })
+
+export const appRole = pgTable("app_role", {
+	id: text("id").primaryKey(),
+	label: text("label").notNull(),
+	description: text("description").notNull().default(""),
+	isSystem: boolean("is_system").notNull().default(false),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+})
+
+export const rolePermission = pgTable(
+	"role_permission",
+	{
+		roleId: text("role_id")
+			.notNull()
+			.references(() => appRole.id, { onDelete: "cascade" }),
+		resource: text("resource").notNull(),
+		action: text("action").notNull(),
+	},
+	(t) => ({ pk: primaryKey({ columns: [t.roleId, t.resource, t.action] }) }),
+)

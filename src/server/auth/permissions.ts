@@ -1,6 +1,6 @@
 import { createAccessControl } from "better-auth/plugins/access"
 
-export const ac = createAccessControl({
+export const resourceActions = {
 	user: [
 		"create",
 		"list",
@@ -14,7 +14,9 @@ export const ac = createAccessControl({
 		"update",
 	],
 	session: ["list", "revoke", "delete"],
-})
+} as const
+
+export const ac = createAccessControl(resourceActions)
 
 export const superAdminRole = ac.newRole({
 	user: [

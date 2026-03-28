@@ -9,7 +9,7 @@ export const publicProcedure = os.$context<ORPCContext>()
 
 // Requires an authenticated session
 export const protectedProcedure = publicProcedure.use(
-	(options, input, output) => {
+	(options) => {
 		if (!options.context.session) {
 			throw new ORPCError("UNAUTHORIZED", {
 				message: "You must be signed in",
@@ -26,7 +26,7 @@ export const protectedProcedure = publicProcedure.use(
 
 // Requires one of the specified roles
 export const requireRole = (...allowedRoles: AppRole[]) =>
-	protectedProcedure.use((options, input, output) => {
+	protectedProcedure.use((options) => {
 		const role = options.context.session.user.role as AppRole
 		if (!allowedRoles.includes(role)) {
 			throw new ORPCError("FORBIDDEN", {
@@ -41,7 +41,7 @@ export const requirePermission = <R extends keyof (typeof roles)["user"]["statem
 	resource: R,
 	actions: string[],
 ) =>
-	protectedProcedure.use((options, input, output) => {
+	protectedProcedure.use((options) => {
 		const role = options.context.session.user.role as AppRole
 		const roleObj = roles[role]
 		if (!roleObj) {
