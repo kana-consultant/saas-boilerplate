@@ -3,11 +3,11 @@ import { createFileRoute } from "@tanstack/react-router"
 import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar"
 
 import { useSession } from "#/routes/_public/auth/_hooks/use-session"
-import { AppSidebar } from "./_components/app-sidebar"
-import { ProfileForm } from "./_components/profile-form"
-import { SiteHeader } from "./_components/site-header"
+import { AppSidebar } from "../_components/app-sidebar"
+import { ProfileForm } from "../_components/profile-form"
+import { SiteHeader } from "../_components/site-header"
 
-export const Route = createFileRoute("/_authenticated/me")({
+export const Route = createFileRoute("/_authenticated/$orgSlug/me")({
 	component: MePage,
 })
 

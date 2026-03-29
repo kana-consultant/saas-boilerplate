@@ -29,8 +29,9 @@ export function OrgSwitcher() {
 	const { data: activeOrg } = useActiveOrganization()
 	const { data: orgs } = useListOrganizations()
 
-	const handleSetActive = async (organizationId: string) => {
-		await authClient.organization.setActive({ organizationId })
+	const handleSwitchOrg = async (org: { id: string; slug: string | null }) => {
+		await authClient.organization.setActive({ organizationId: org.id })
+		navigate({ to: "/$orgSlug/dashboard", params: { orgSlug: org.slug ?? org.id } })
 	}
 
 	return (
@@ -65,7 +66,7 @@ export function OrgSwitcher() {
 						{orgs?.map((org) => (
 							<DropdownMenuItem
 								key={org.id}
-								onClick={() => handleSetActive(org.id)}
+								onClick={() => handleSwitchOrg(org)}
 							>
 								{org.logo ? (
 									<img

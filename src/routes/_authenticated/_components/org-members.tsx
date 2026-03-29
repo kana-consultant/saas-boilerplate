@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { IconTrash, IconUserX } from "@tabler/icons-react"
+import { toast } from "sonner"
 
 import { Badge } from "#/components/ui/badge"
 import { Button } from "#/components/ui/button"
@@ -71,33 +72,50 @@ export function OrgMembers() {
 
 		if (error) {
 			setInviteError(error.message ?? "Failed to send invitation")
+			toast.error(error.message ?? "Failed to send invitation")
 		} else {
 			setInviteEmail("")
+			toast.success("Invitation sent")
 			refetch?.()
 		}
 		setInviting(false)
 	}
 
 	const handleChangeRole = async (memberId: string, role: OrgRole) => {
-		await authClient.organization.updateMemberRole({
+		const { error } = await authClient.organization.updateMemberRole({
 			organizationId: activeOrg.id,
 			memberId,
 			role,
 		})
-		refetch?.()
+		if (error) {
+			toast.error(error.message ?? "Failed to update role")
+		} else {
+			toast.success("Member role updated")
+			refetch?.()
+		}
 	}
 
 	const handleRemoveMember = async (memberId: string) => {
-		await authClient.organization.removeMember({
+		const { error } = await authClient.organization.removeMember({
 			organizationId: activeOrg.id,
 			memberIdOrEmail: memberId,
 		})
-		refetch?.()
+		if (error) {
+			toast.error(error.message ?? "Failed to remove member")
+		} else {
+			toast.success("Member removed")
+			refetch?.()
+		}
 	}
 
 	const handleCancelInvitation = async (invitationId: string) => {
-		await authClient.organization.cancelInvitation({ invitationId })
-		refetch?.()
+		const { error } = await authClient.organization.cancelInvitation({ invitationId })
+		if (error) {
+			toast.error(error.message ?? "Failed to cancel invitation")
+		} else {
+			toast.success("Invitation cancelled")
+			refetch?.()
+		}
 	}
 
 	return (

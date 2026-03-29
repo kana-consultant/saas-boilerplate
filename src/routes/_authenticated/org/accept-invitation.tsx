@@ -27,7 +27,7 @@ function AcceptInvitationPage() {
 				if (err) {
 					setError(err.message ?? "Failed to accept invitation")
 				} else {
-					navigate({ to: "/dashboard" })
+					navigate({ to: "/" })
 				}
 			})
 	}, [invitationId, navigate])

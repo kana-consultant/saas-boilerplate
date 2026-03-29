@@ -1,5 +1,6 @@
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Button } from "#/components/ui/button"
@@ -20,7 +21,6 @@ function fieldError(schema: z.ZodTypeAny, value: string) {
 
 export function SettingsSecurity() {
 	const [submitError, setSubmitError] = React.useState<string | null>(null)
-	const [submitSuccess, setSubmitSuccess] = React.useState(false)
 
 	const form = useForm({
 		defaultValues: {
@@ -30,7 +30,6 @@ export function SettingsSecurity() {
 		},
 		onSubmit: async ({ value }) => {
 			setSubmitError(null)
-			setSubmitSuccess(false)
 
 			if (value.newPassword !== value.confirmPassword) {
 				setSubmitError("New passwords do not match")
@@ -44,13 +43,17 @@ export function SettingsSecurity() {
 					revokeOtherSessions: false,
 				})
 				if (result.error) {
-					setSubmitError(result.error.message ?? "Failed to change password")
+					const msg = result.error.message ?? "Failed to change password"
+					setSubmitError(msg)
+					toast.error(msg)
 					return
 				}
-				setSubmitSuccess(true)
+				toast.success("Password changed")
 				form.reset()
 			} catch (err) {
-				setSubmitError(err instanceof Error ? err.message : "Failed to change password")
+				const msg = err instanceof Error ? err.message : "Failed to change password"
+				setSubmitError(msg)
+				toast.error(msg)
 			}
 		},
 	})
@@ -73,7 +76,6 @@ export function SettingsSecurity() {
 					className="flex max-w-sm flex-col gap-4"
 					onSubmit={(e) => {
 						e.preventDefault()
-						setSubmitSuccess(false)
 						form.handleSubmit()
 					}}
 				>
@@ -182,11 +184,6 @@ export function SettingsSecurity() {
 					{submitError && (
 						<p className="text-destructive text-sm" role="alert">
 							{submitError}
-						</p>
-					)}
-					{submitSuccess && (
-						<p className="text-sm text-emerald-600" role="status">
-							Password changed successfully.
 						</p>
 					)}
 

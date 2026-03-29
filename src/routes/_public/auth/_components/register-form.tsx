@@ -35,7 +35,7 @@ export const RegisterForm = () => {
 				return
 			}
 			await router.invalidate()
-			throw redirect({ to: "/dashboard" })
+			throw redirect({ to: "/" })
 		},
 	})
 

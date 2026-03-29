@@ -1,6 +1,7 @@
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Button } from "#/components/ui/button"
@@ -62,7 +63,9 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 		onSuccess: () => {
 			invalidate()
 			onOpenChange(false)
+			toast.success("Role created")
 		},
+		onError: (err) => toast.error(extractErrorMessage(err)),
 	})
 
 	const updateRole = useMutation({
@@ -70,7 +73,9 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 		onSuccess: () => {
 			invalidate()
 			onOpenChange(false)
+			toast.success("Role updated")
 		},
+		onError: (err) => toast.error(extractErrorMessage(err)),
 	})
 
 	const mutation = mode === "create" ? createRole : updateRole

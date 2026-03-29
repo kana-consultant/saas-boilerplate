@@ -1,5 +1,7 @@
 import * as React from "react"
 import {
+	IconActivity,
+	IconBuilding,
 	IconDashboard,
 	IconDatabase,
 	IconFileWord,
@@ -11,8 +13,8 @@ import {
 	IconUserCog,
 	IconUsers,
 	IconUsersGroup,
-	IconBuilding,
 } from "@tabler/icons-react"
+import { useParams } from "@tanstack/react-router"
 
 import {
 	Sidebar,
@@ -29,12 +31,6 @@ import { NavSecondary } from "./nav-secondary"
 import { NavUser } from "./nav-user"
 import { OrgSwitcher } from "./org-switcher"
 
-const navSecondary = [
-	{ title: "Settings", url: "/settings", icon: IconSettings },
-	{ title: "Get Help", url: "#", icon: IconHelp },
-	{ title: "Search", url: "#", icon: IconSearch },
-]
-
 const documents = [
 	{ name: "Data Library", url: "#", icon: IconDatabase },
 	{ name: "Reports", url: "#", icon: IconReport },
@@ -44,7 +40,11 @@ const documents = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const session = useSession()
 	const canListUsers = useHasPermission("user", ["list"])
+	const canViewActivityLog = useHasPermission("activity-log", ["list"])
 	const { data: activeOrg } = useActiveOrganization()
+	// orgSlug may not be in params if we're on a non-$orgSlug route
+	const params = useParams({ strict: false })
+	const orgSlug = (params as { orgSlug?: string }).orgSlug ?? ""
 
 	const user = {
 		name: session.data?.user?.name ?? "",
@@ -52,22 +52,38 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 		avatar: session.data?.user?.image ?? "",
 	}
 
-	const navMain = [
-		{ title: "Dashboard", url: "/dashboard", icon: IconDashboard },
-		...(canListUsers
-			? [
-					{ title: "Users", url: "/users", icon: IconUsers },
-					{ title: "Roles", url: "/roles", icon: IconUserCog },
-					{ title: "Permissions", url: "/permissions", icon: IconShieldCheck },
-				]
-			: []),
-		...(activeOrg
-			? [
-					{ title: "Organization", url: "/org/settings", icon: IconBuilding },
-					{ title: "Members", url: "/org/settings?tab=members", icon: IconUsersGroup },
-				]
-			: []),
-	]
+	const navMain = orgSlug
+		? [
+				{ title: "Dashboard", url: `/${orgSlug}/dashboard`, icon: IconDashboard },
+				...(canListUsers
+					? [
+							{ title: "Users", url: `/${orgSlug}/users`, icon: IconUsers },
+							{ title: "Roles", url: `/${orgSlug}/roles`, icon: IconUserCog },
+							{ title: "Permissions", url: `/${orgSlug}/permissions`, icon: IconShieldCheck },
+						]
+					: []),
+				...(canViewActivityLog
+					? [{ title: "Activity Log", url: `/${orgSlug}/activity`, icon: IconActivity }]
+					: []),
+				...(activeOrg
+					? [
+							{ title: "Organization", url: `/${orgSlug}/org/settings`, icon: IconBuilding },
+							{ title: "Members", url: `/${orgSlug}/org/settings?tab=members`, icon: IconUsersGroup },
+						]
+					: []),
+			]
+		: []
+
+	const navSecondary = orgSlug
+		? [
+				{ title: "Settings", url: `/${orgSlug}/settings`, icon: IconSettings },
+				{ title: "Get Help", url: "#", icon: IconHelp },
+				{ title: "Search", url: "#", icon: IconSearch },
+			]
+		: [
+				{ title: "Get Help", url: "#", icon: IconHelp },
+				{ title: "Search", url: "#", icon: IconSearch },
+			]
 
 	return (
 		<Sidebar collapsible="icon" {...props}>

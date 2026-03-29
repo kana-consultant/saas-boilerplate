@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { IconTrash } from "@tabler/icons-react"
 import { useNavigate } from "@tanstack/react-router"
+import { toast } from "sonner"
 
 import { Button } from "#/components/ui/button"
 import { Input } from "#/components/ui/input"
@@ -28,7 +29,6 @@ export function OrgSettingsGeneral() {
 	const [saving, setSaving] = useState(false)
 	const [deleting, setDeleting] = useState(false)
 	const [error, setError] = useState<string | null>(null)
-	const [success, setSuccess] = useState(false)
 
 	if (!activeOrg) return null
 
@@ -36,7 +36,6 @@ export function OrgSettingsGeneral() {
 		e.preventDefault()
 		setSaving(true)
 		setError(null)
-		setSuccess(false)
 
 		const { error: err } = await authClient.organization.update({
 			organizationId: activeOrg.id,
@@ -45,8 +44,9 @@ export function OrgSettingsGeneral() {
 
 		if (err) {
 			setError(err.message ?? "Failed to update organization")
+			toast.error(err.message ?? "Failed to update organization")
 		} else {
-			setSuccess(true)
+			toast.success("Organization updated")
 		}
 		setSaving(false)
 	}
@@ -66,8 +66,10 @@ export function OrgSettingsGeneral() {
 
 		if (err) {
 			setError(err.message ?? "Failed to delete organization")
+			toast.error(err.message ?? "Failed to delete organization")
 			setDeleting(false)
 		} else {
+			toast.success("Organization deleted")
 			navigate({ to: "/org/create" })
 		}
 	}
@@ -104,9 +106,6 @@ export function OrgSettingsGeneral() {
 					/>
 				</div>
 				{error && <p className="text-sm text-destructive">{error}</p>}
-				{success && (
-					<p className="text-sm text-green-600">Changes saved.</p>
-				)}
 				<Button type="submit" disabled={saving}>
 					{saving ? "Saving..." : "Save changes"}
 				</Button>

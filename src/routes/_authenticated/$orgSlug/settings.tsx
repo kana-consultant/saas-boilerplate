@@ -1,20 +1,20 @@
 import * as React from "react"
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router"
+import { createFileRoute, Link, useParams, useSearch } from "@tanstack/react-router"
 import { IconLock, IconUser } from "@tabler/icons-react"
 import { z } from "zod"
 import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar"
 
 import { useSession } from "#/routes/_public/auth/_hooks/use-session"
-import { AppSidebar } from "./_components/app-sidebar"
-import { SettingsProfile } from "./_components/settings-profile"
-import { SettingsSecurity } from "./_components/settings-security"
-import { SiteHeader } from "./_components/site-header"
+import { AppSidebar } from "../_components/app-sidebar"
+import { SettingsProfile } from "../_components/settings-profile"
+import { SettingsSecurity } from "../_components/settings-security"
+import { SiteHeader } from "../_components/site-header"
 
 const searchSchema = z.object({
 	tab: z.enum(["profile", "security"]).default("profile").catch("profile"),
 })
 
-export const Route = createFileRoute("/_authenticated/settings")({
+export const Route = createFileRoute("/_authenticated/$orgSlug/settings")({
 	validateSearch: searchSchema,
 	component: SettingsPage,
 })
@@ -26,7 +26,8 @@ const NAV_ITEMS = [
 
 function SettingsPage() {
 	const session = useSession()
-	const { tab } = useSearch({ from: "/_authenticated/settings" })
+	const { orgSlug } = useParams({ from: "/_authenticated/$orgSlug/settings" })
+	const { tab } = useSearch({ from: "/_authenticated/$orgSlug/settings" })
 	const user = session.data?.user
 
 	return (
@@ -50,14 +51,14 @@ function SettingsPage() {
 					</div>
 
 					<div className="flex flex-1 flex-col gap-0 md:flex-row">
-						{/* Left nav */}
 						<nav className="flex shrink-0 flex-row gap-1 border-b px-4 pb-3 md:w-52 md:flex-col md:border-b-0 md:border-r md:px-4 md:py-2">
 							{NAV_ITEMS.map((item) => {
 								const isActive = tab === item.id
 								return (
 									<Link
 										key={item.id}
-										to="/settings"
+										to="/$orgSlug/settings"
+										params={{ orgSlug }}
 										search={{ tab: item.id }}
 										className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors ${
 											isActive
@@ -72,7 +73,6 @@ function SettingsPage() {
 							})}
 						</nav>
 
-						{/* Content */}
 						<div className="flex-1 p-4 md:p-6 md:pt-4">
 							{tab === "profile" && user && (
 								<SettingsProfile

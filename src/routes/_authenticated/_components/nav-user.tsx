@@ -5,7 +5,7 @@ import {
 	IconNotification,
 	IconUserCircle,
 } from "@tabler/icons-react"
-import { Link } from "@tanstack/react-router"
+import { Link, useParams } from "@tanstack/react-router"
 
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar"
 import {
@@ -36,6 +36,8 @@ export function NavUser({
 }) {
 	const { isMobile } = useSidebar()
 	const signOut = useSignOut()
+	const params = useParams({ strict: false })
+	const orgSlug = (params as { orgSlug?: string }).orgSlug ?? ""
 
 	const initials = user.name
 		.split(" ")
@@ -89,7 +91,7 @@ export function NavUser({
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
 							<DropdownMenuItem asChild>
-								<Link to="/me">
+								<Link to="/$orgSlug/me" params={{ orgSlug }}>
 									<IconUserCircle />
 									Account
 								</Link>

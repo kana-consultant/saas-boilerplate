@@ -34,7 +34,7 @@ export const LoginForm = () => {
 				return
 			}
 			await router.invalidate()
-			throw redirect({ to: "/dashboard" })
+			throw redirect({ to: "/" })
 		},
 	})
 

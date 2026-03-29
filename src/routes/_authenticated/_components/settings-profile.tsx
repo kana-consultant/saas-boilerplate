@@ -1,6 +1,7 @@
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { useRouter } from "@tanstack/react-router"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Badge } from "#/components/ui/badge"
@@ -22,19 +23,19 @@ interface SettingsProfileProps {
 export function SettingsProfile({ name, email, role, createdAt }: SettingsProfileProps) {
 	const router = useRouter()
 	const [submitError, setSubmitError] = React.useState<string | null>(null)
-	const [submitSuccess, setSubmitSuccess] = React.useState(false)
 
 	const form = useForm({
 		defaultValues: { name },
 		onSubmit: async ({ value }) => {
 			setSubmitError(null)
-			setSubmitSuccess(false)
 			try {
 				await authClient.updateUser({ name: value.name.trim() })
 				await router.invalidate()
-				setSubmitSuccess(true)
+				toast.success("Profile updated")
 			} catch (err) {
-				setSubmitError(err instanceof Error ? err.message : "Failed to update profile")
+				const msg = err instanceof Error ? err.message : "Failed to update profile"
+				setSubmitError(msg)
+				toast.error(msg)
 			}
 		},
 	})
@@ -54,7 +55,6 @@ export function SettingsProfile({ name, email, role, createdAt }: SettingsProfil
 				className="flex flex-col gap-5"
 				onSubmit={(e) => {
 					e.preventDefault()
-					setSubmitSuccess(false)
 					form.handleSubmit()
 				}}
 			>
@@ -133,12 +133,6 @@ export function SettingsProfile({ name, email, role, createdAt }: SettingsProfil
 						{submitError}
 					</p>
 				)}
-				{submitSuccess && (
-					<p className="text-sm text-emerald-600" role="status">
-						Profile updated successfully.
-					</p>
-				)}
-
 				<div>
 					<form.Subscribe
 						selector={(s) => ({

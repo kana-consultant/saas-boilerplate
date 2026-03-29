@@ -65,7 +65,7 @@ function CreateOrgPage() {
 			return
 		}
 
-		navigate({ to: "/dashboard" })
+		navigate({ to: "/$orgSlug/dashboard", params: { orgSlug: slug.trim() } })
 	}
 
 	return (

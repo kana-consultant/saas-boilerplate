@@ -1,6 +1,7 @@
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { useRouter } from "@tanstack/react-router"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Badge } from "#/components/ui/badge"
@@ -39,10 +40,11 @@ export function ProfileForm({ name, email, role, createdAt }: ProfileFormProps) 
 			try {
 				await authClient.updateUser({ name: value.name.trim() })
 				await router.invalidate()
+				toast.success("Profile updated")
 			} catch (err) {
-				setSubmitError(
-					err instanceof Error ? err.message : "Failed to update profile",
-				)
+				const msg = err instanceof Error ? err.message : "Failed to update profile"
+				setSubmitError(msg)
+				toast.error(msg)
 			}
 		},
 	})
