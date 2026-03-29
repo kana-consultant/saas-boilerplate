@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { IconTrash, IconUserX } from "@tabler/icons-react"
 import { toast } from "sonner"
 
@@ -11,8 +10,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "#/components/ui/card"
-import { Input } from "#/components/ui/input"
-import { Label } from "#/components/ui/label"
 import {
 	Select,
 	SelectContent,
@@ -23,6 +20,7 @@ import {
 import { Separator } from "#/components/ui/separator"
 import { authClient } from "#/server/auth/client"
 import { useActiveOrganization } from "#/routes/_public/auth/_hooks/use-active-organization"
+import { OrgInviteForm } from "./org-invite-form"
 
 type OrgRole = "owner" | "admin" | "member"
 
@@ -30,11 +28,6 @@ const ROLES: OrgRole[] = ["owner", "admin", "member"]
 
 export function OrgMembers() {
 	const { data: activeOrg, refetch } = useActiveOrganization()
-
-	const [inviteEmail, setInviteEmail] = useState("")
-	const [inviteRole, setInviteRole] = useState<OrgRole>("member")
-	const [inviting, setInviting] = useState(false)
-	const [inviteError, setInviteError] = useState<string | null>(null)
 
 	if (!activeOrg) return null
 
@@ -57,29 +50,6 @@ export function OrgMembers() {
 	const invitations = (fullOrg.invitations ?? []).filter(
 		(i) => i.status === "pending",
 	)
-
-	const handleInvite = async (e: React.FormEvent) => {
-		e.preventDefault()
-		if (!inviteEmail.trim()) return
-		setInviting(true)
-		setInviteError(null)
-
-		const { error } = await authClient.organization.inviteMember({
-			organizationId: activeOrg.id,
-			email: inviteEmail.trim(),
-			role: inviteRole,
-		})
-
-		if (error) {
-			setInviteError(error.message ?? "Failed to send invitation")
-			toast.error(error.message ?? "Failed to send invitation")
-		} else {
-			setInviteEmail("")
-			toast.success("Invitation sent")
-			refetch?.()
-		}
-		setInviting(false)
-	}
 
 	const handleChangeRole = async (memberId: string, role: OrgRole) => {
 		const { error } = await authClient.organization.updateMemberRole({
@@ -120,55 +90,11 @@ export function OrgMembers() {
 
 	return (
 		<div className="space-y-6">
-			{/* Invite section */}
-			<Card>
-				<CardHeader>
-					<CardTitle>Invite member</CardTitle>
-					<CardDescription>
-						Send an invitation to add someone to this organization.
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<form onSubmit={handleInvite} className="flex gap-3">
-						<div className="flex-1 space-y-1">
-							<Label htmlFor="invite-email" className="sr-only">
-								Email
-							</Label>
-							<Input
-								id="invite-email"
-								type="email"
-								placeholder="colleague@example.com"
-								value={inviteEmail}
-								onChange={(e) => setInviteEmail(e.target.value)}
-								required
-							/>
-						</div>
-						<Select
-							value={inviteRole}
-							onValueChange={(v) => setInviteRole(v as OrgRole)}
-						>
-							<SelectTrigger className="w-32">
-								<SelectValue />
-							</SelectTrigger>
-							<SelectContent>
-								{ROLES.map((r) => (
-									<SelectItem key={r} value={r}>
-										{r.charAt(0).toUpperCase() + r.slice(1)}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						<Button type="submit" disabled={inviting}>
-							{inviting ? "Sending..." : "Invite"}
-						</Button>
-					</form>
-					{inviteError && (
-						<p className="mt-2 text-sm text-destructive">{inviteError}</p>
-					)}
-				</CardContent>
-			</Card>
+			<OrgInviteForm
+				organizationId={activeOrg.id}
+				onInvited={() => refetch?.()}
+			/>
 
-			{/* Members list */}
 			<Card>
 				<CardHeader>
 					<CardTitle>Members</CardTitle>
@@ -218,7 +144,6 @@ export function OrgMembers() {
 				</CardContent>
 			</Card>
 
-			{/* Pending invitations */}
 			{invitations.length > 0 && (
 				<Card>
 					<CardHeader>

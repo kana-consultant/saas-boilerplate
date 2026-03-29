@@ -6,23 +6,14 @@ import {
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
-	type ColumnDef,
 	type ColumnFiltersState,
 	type SortingState,
 } from "@tanstack/react-table"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { IconDotsVertical, IconPlus } from "@tabler/icons-react"
+import { IconPlus } from "@tabler/icons-react"
 import { toast } from "sonner"
 
-import { Badge } from "#/components/ui/badge"
 import { Button } from "#/components/ui/button"
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "#/components/ui/dropdown-menu"
 import { Input } from "#/components/ui/input"
 import {
 	Select,
@@ -42,6 +33,7 @@ import {
 import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 import { orpc } from "#/server/orpc/client"
 import { UserFormSheet } from "./user-form-sheet"
+import { getUserColumns } from "./user-table-columns"
 
 export interface UserRow {
 	id: string
@@ -85,109 +77,15 @@ export function UsersDataTable({ users }: { users: UserRow[] }) {
 		onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to update role"),
 	})
 
-	const columns: ColumnDef<UserRow>[] = [
-		{ accessorKey: "name", header: "Name" },
-		{ accessorKey: "email", header: "Email" },
-		{
-			accessorKey: "role",
-			header: "Role",
-			cell: ({ row }) => (
-				<Badge variant="outline">{row.original.role ?? "member"}</Badge>
-			),
-		},
-		{
-			id: "status",
-			header: "Status",
-			cell: ({ row }) =>
-				row.original.banned ? (
-					<Badge variant="destructive">Banned</Badge>
-				) : (
-					<Badge variant="secondary">Active</Badge>
-				),
-		},
-		{
-			accessorKey: "createdAt",
-			header: "Created",
-			cell: ({ row }) =>
-				new Date(row.original.createdAt).toLocaleDateString(undefined, {
-					year: "numeric",
-					month: "short",
-					day: "numeric",
-				}),
-		},
-		{
-			id: "actions",
-			header: "",
-			cell: ({ row }) => {
-				const user = row.original
-				return (
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" size="icon" className="size-8">
-								<IconDotsVertical className="size-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem
-								onClick={() => setSheet({ open: true, mode: "edit", user })}
-							>
-								Edit
-							</DropdownMenuItem>
-							<DropdownMenuSeparator />
-							{user.banned ? (
-								<DropdownMenuItem
-									onClick={() => unbanUser.mutate({ userId: user.id })}
-								>
-									Unban
-								</DropdownMenuItem>
-							) : (
-								<DropdownMenuItem
-									onClick={() => banUser.mutate({ userId: user.id })}
-								>
-									Ban
-								</DropdownMenuItem>
-							)}
-							{canSetRole && (
-								<>
-									<DropdownMenuSeparator />
-									<DropdownMenuItem
-										onClick={() => setRole.mutate({ userId: user.id, role: "member" })}
-									>
-										Set role: member
-									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() => setRole.mutate({ userId: user.id, role: "admin" })}
-									>
-										Set role: admin
-									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() =>
-											setRole.mutate({ userId: user.id, role: "owner" })
-										}
-									>
-										Set role: owner
-									</DropdownMenuItem>
-								</>
-							)}
-							{canDelete && (
-								<>
-									<DropdownMenuSeparator />
-									<DropdownMenuItem
-										className="text-destructive focus:text-destructive"
-										onClick={() =>
-											setSheet({ open: true, mode: "delete", user })
-										}
-									>
-										Delete
-									</DropdownMenuItem>
-								</>
-							)}
-						</DropdownMenuContent>
-					</DropdownMenu>
-				)
-			},
-		},
-	]
+	const columns = getUserColumns({
+		canSetRole,
+		canDelete,
+		onEdit: (user) => setSheet({ open: true, mode: "edit", user }),
+		onDelete: (user) => setSheet({ open: true, mode: "delete", user }),
+		onBan: (userId) => banUser.mutate({ userId }),
+		onUnban: (userId) => unbanUser.mutate({ userId }),
+		onSetRole: (userId, role) => setRole.mutate({ userId, role }),
+	})
 
 	const table = useReactTable({
 		data: users,
@@ -305,7 +203,6 @@ export function UsersDataTable({ users }: { users: UserRow[] }) {
 				</div>
 			</div>
 
-			{/* Sheets */}
 			{sheet.open && sheet.mode === "create" && (
 				<UserFormSheet
 					mode="create"
