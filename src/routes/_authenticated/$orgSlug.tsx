@@ -2,26 +2,19 @@ import { useEffect } from "react"
 import { Outlet, createFileRoute, redirect, useParams } from "@tanstack/react-router"
 
 import { authClient } from "#/server/auth/client"
-import { listOrganizationsFn } from "#/routes/_public/auth/_server/list-organizations"
-import { getOrgRoleFn } from "#/routes/_public/auth/_server/get-org-role"
+import { getOrgContextFn } from "#/routes/_public/auth/_server/get-org-context"
 import { useActiveOrganization } from "#/routes/_public/auth/_hooks/use-active-organization"
 import { useListOrganizations } from "#/routes/_public/auth/_hooks/use-list-organizations"
 
 export const Route = createFileRoute("/_authenticated/$orgSlug")({
 	beforeLoad: async ({ params }) => {
-		const orgs = await listOrganizationsFn()
-		const org = orgs?.find((o) => o.slug === params.orgSlug)
-		if (!org) {
-			if (!orgs || orgs.length === 0) {
-				throw redirect({ to: "/org/create" })
-			}
-			throw redirect({
-				to: "/$orgSlug/dashboard",
-				params: { orgSlug: orgs[0].slug ?? orgs[0].id },
-			})
+		const ctx = await getOrgContextFn({ data: { orgSlug: params.orgSlug } })
+		if (!ctx) throw redirect({ to: "/auth/login" })
+		if (!ctx.org) {
+			if (!ctx.redirectSlug) throw redirect({ to: "/org/create" })
+			throw redirect({ to: "/$orgSlug/dashboard", params: { orgSlug: ctx.redirectSlug } })
 		}
-		const orgRole = await getOrgRoleFn({ data: { orgId: org.id } })
-		return { orgRole }
+		return { orgRole: ctx.orgRole }
 	},
 	component: OrgLayout,
 })

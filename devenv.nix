@@ -12,6 +12,11 @@
     corepack.enable = true;
   };
 
+  services.redis = {
+    enable = true;
+    port = 6379;
+  };
+
   services.postgres = {
     enable = true;
     package = pkgs.postgresql_16;
@@ -26,6 +31,7 @@
   };
 
   env.DATABASE_URL = "postgresql://tanstack:tanstack@127.0.0.1:5432/tanstack_start_dev";
+  env.REDIS_URL = "redis://127.0.0.1:6379";
   env.BETTER_AUTH_URL = "http://localhost:3000";
 
   processes = {

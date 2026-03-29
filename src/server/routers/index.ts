@@ -3,6 +3,7 @@ import { and, desc, eq, sql } from "drizzle-orm"
 
 import { auth } from "#/server/auth"
 import { logActivity } from "#/server/activity"
+import { cacheDel } from "#/libs/redis"
 import type { AppRole } from "#/server/auth/permissions"
 import { resourceActions, roles } from "#/server/auth/permissions"
 import { db } from "#/libs/drizzle"
@@ -219,6 +220,7 @@ const router = {
 							eq(schema.member.organizationId, activeOrgId),
 						),
 					)
+				await cacheDel(`member:role:${input.userId}:${activeOrgId}`)
 				await logActivity({
 					userId: context.session.user.id,
 					organizationId: activeOrgId,
@@ -258,6 +260,8 @@ const router = {
 						userId: newUserId,
 						role: input.role,
 					})
+					// New user now has a default org — prime cache
+					await cacheDel(`user:default-org:${newUserId}`)
 				}
 				await logActivity({
 					userId: context.session.user.id,
