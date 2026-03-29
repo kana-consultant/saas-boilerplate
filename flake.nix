@@ -1,5 +1,5 @@
 {
-  description = "TanStack Start Boilerplate — dev environment with PostgreSQL";
+  description = "SaaS Boilerplate — dev environment with PostgreSQL";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
