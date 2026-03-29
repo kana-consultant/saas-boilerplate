@@ -5,7 +5,7 @@ import { organization } from "better-auth/plugins/organization"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 
 import { db } from "#/libs/drizzle"
-import { ac, roles } from "#/server/auth/permissions"
+import { ac, platformRoles } from "#/server/auth/permissions"
 
 export const auth = betterAuth({
 	database: drizzleAdapter(db, { provider: "pg" }),
@@ -18,7 +18,7 @@ export const auth = betterAuth({
 			defaultRole: "user",
 			adminRoles: ["super-admin", "admin"],
 			ac,
-			roles,
+			roles: platformRoles,
 		}),
 		organization({
 			allowUserToCreateOrganization: true,
