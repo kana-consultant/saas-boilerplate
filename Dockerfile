@@ -1,42 +1,42 @@
-# ── deps stage ──────────────────────────────────────────────────────────────
+# ─── Stage 1: deps ────────────────────────────────────────────────────────────
 FROM node:22-alpine AS deps
-WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable pnpm
+
+WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-# ── builder stage ────────────────────────────────────────────────────────────
+# ─── Stage 2: build ───────────────────────────────────────────────────────────
 FROM node:22-alpine AS builder
-WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable pnpm
+
+WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ARG DATABASE_URL
-ARG BETTER_AUTH_SECRET
-ARG BETTER_AUTH_URL
-ARG VITE_POSTHOG_KEY
-
 RUN pnpm build
 
-# ── runner stage ─────────────────────────────────────────────────────────────
+# ─── Stage 3: runner ──────────────────────────────────────────────────────────
 FROM node:22-alpine AS runner
+
+RUN corepack enable pnpm
+
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs \
- && adduser  --system --uid 1001 appuser
+# Only production deps
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --prod
 
-COPY --from=builder --chown=appuser:nodejs /app/.output ./.output
-COPY --from=builder --chown=appuser:nodejs /app/package.json ./package.json
-
-USER appuser
+# Server entrypoint + build output
+COPY server.mjs ./
+COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
 
-CMD ["node", ".output/server/index.mjs"]
+CMD ["node", "server.mjs"]

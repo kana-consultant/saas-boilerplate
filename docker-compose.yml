@@ -1,36 +1,45 @@
 services:
   app:
-    build:
-      context: .
-      args:
-        DATABASE_URL: ${DATABASE_URL}
-        BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-        BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
-        VITE_POSTHOG_KEY: ${VITE_POSTHOG_KEY:-}
+    build: .
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: ${DATABASE_URL}
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://tanstack:tanstack@postgres:5432/tanstack_start_dev
+      REDIS_URL: redis://redis:6379
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
-      VITE_POSTHOG_KEY: ${VITE_POSTHOG_KEY:-}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
     depends_on:
-      db:
+      postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: unless-stopped
 
-  db:
-    image: postgres:17-alpine
+  postgres:
+    image: postgres:16-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-tanstack}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tanstack}
-      POSTGRES_DB: ${POSTGRES_DB:-tanstack_start_dev}
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: tanstack_start_dev
+      POSTGRES_USER: tanstack
+      POSTGRES_PASSWORD: tanstack
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tanstack}"]
+      test: ["CMD-SHELL", "pg_isready -U tanstack -d tanstack_start_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -38,3 +47,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:

@@ -1,9 +1,8 @@
-.git
-.github
 node_modules
-.output
-.cache
-drizzle
-*.md
+dist
+.git
+.devenv
+.direnv
 .env*
-!.env.example
+*.md
+drizzle
