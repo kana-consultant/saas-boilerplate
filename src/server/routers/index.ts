@@ -2,6 +2,7 @@ import { ORPCError } from "@orpc/server"
 import { and, desc, eq, sql } from "drizzle-orm"
 
 import { auth } from "#/server/auth"
+import { logActivity } from "#/server/activity"
 import type { AppRole } from "#/server/auth/permissions"
 import { resourceActions, roles } from "#/server/auth/permissions"
 import { db } from "#/libs/drizzle"
@@ -26,31 +27,6 @@ import {
 	updateRoleSchema,
 	updateUserSchema,
 } from "#/server/orpc/schema"
-
-// ─── Activity log helper ──────────────────────────────────────────────────
-
-async function logActivity(entry: {
-	userId?: string | null
-	organizationId?: string | null
-	action: string
-	resource: string
-	resourceId?: string | null
-	metadata?: Record<string, unknown>
-	ipAddress?: string | null
-	userAgent?: string | null
-}) {
-	await db.insert(schema.activityLog).values({
-		id: crypto.randomUUID(),
-		userId: entry.userId ?? null,
-		organizationId: entry.organizationId ?? null,
-		action: entry.action,
-		resource: entry.resource,
-		resourceId: entry.resourceId ?? null,
-		metadata: entry.metadata ? JSON.stringify(entry.metadata) : null,
-		ipAddress: entry.ipAddress ?? null,
-		userAgent: entry.userAgent ?? null,
-	})
-}
 
 // ─── Role rank: higher number = more privileged ───────────────────────────
 
@@ -388,6 +364,14 @@ const router = {
 					description: input.description,
 					isSystem: false,
 				})
+				await logActivity({
+					userId: context.session.user.id,
+					organizationId: activeOrgId,
+					action: "create",
+					resource: "role",
+					resourceId: input.id,
+					metadata: { label: input.label },
+				})
 				return { success: true }
 			}),
 
@@ -408,6 +392,14 @@ const router = {
 							eq(schema.appRole.organizationId, activeOrgId),
 						),
 					)
+				await logActivity({
+					userId: context.session.user.id,
+					organizationId: activeOrgId,
+					action: "update",
+					resource: "role",
+					resourceId: id,
+					metadata: data,
+				})
 				return { success: true }
 			}),
 
@@ -444,6 +436,14 @@ const router = {
 							eq(schema.appRole.organizationId, activeOrgId),
 						),
 					)
+				await logActivity({
+					userId: context.session.user.id,
+					organizationId: activeOrgId,
+					action: "delete",
+					resource: "role",
+					resourceId: input.id,
+					metadata: { label: found.label },
+				})
 				return { success: true }
 			}),
 
@@ -497,6 +497,14 @@ const router = {
 							),
 						)
 				}
+				await logActivity({
+					userId: context.session.user.id,
+					organizationId: activeOrgId,
+					action: input.granted ? "grant" : "revoke",
+					resource: "permission",
+					resourceId: input.roleId,
+					metadata: { resource: input.resource, action: input.action },
+				})
 				return { success: true }
 			}),
 

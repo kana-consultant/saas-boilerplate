@@ -1,6 +1,6 @@
 {
   "name": "saas-boilerplate",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "imports": {
@@ -20,7 +20,8 @@
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "db:seed": "node --env-file=.env.local --import=tsx/esm src/libs/drizzle/seed.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -30,6 +30,7 @@ import { NavMain } from "./nav-main"
 import { NavSecondary } from "./nav-secondary"
 import { NavUser } from "./nav-user"
 import { OrgSwitcher } from "./org-switcher"
+import { LangSwitcher } from "./lang-switcher"
 
 const documents = [
 	{ name: "Data Library", url: "#", icon: IconDatabase },
@@ -96,6 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				<NavSecondary items={navSecondary} className="mt-auto" />
 			</SidebarContent>
 			<SidebarFooter>
+				<LangSwitcher />
 				<NavUser user={user} />
 			</SidebarFooter>
 		</Sidebar>

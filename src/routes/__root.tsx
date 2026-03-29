@@ -1,21 +1,41 @@
+import { lazy, Suspense } from "react"
 import {
 	HeadContent,
 	Outlet,
 	Scripts,
 	createRootRouteWithContext,
 } from "@tanstack/react-router"
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
-import { TanStackDevtools } from "@tanstack/react-devtools"
 
 import { Toaster } from "sonner"
-import PostHogProvider from "#/libs/posthog/provider"
+const PostHogProvider = lazy(() => import("#/libs/posthog/provider"))
 import TanStackQueryProvider from "#/libs/tanstack-query/root-provider"
-import TanStackQueryDevtools from "#/libs/tanstack-query/devtools"
 
-import { getLocale } from "#/libs/paraglide"
+const TanStackDevtools = import.meta.env.DEV
+	? lazy(() =>
+			Promise.all([
+				import("@tanstack/react-devtools"),
+				import("@tanstack/react-router-devtools"),
+				import("#/libs/tanstack-query/devtools"),
+			]).then(([{ TanStackDevtools }, { TanStackRouterDevtoolsPanel }, TanStackQueryDevtools]) => ({
+				default: () => (
+					<TanStackDevtools
+						config={{ position: "bottom-right" }}
+						plugins={[
+							{ name: "Tanstack Router", render: <TanStackRouterDevtoolsPanel /> },
+							TanStackQueryDevtools.default,
+						]}
+					/>
+				),
+			}))
+		)
+	: () => null
+
+import { getLocale, setLocale } from "#/libs/paraglide"
 import { getSessionFn } from "#/routes/_public/auth/_server/get-session"
 
 import appCss from "../styles.css?url"
+
+import { z } from "zod"
 
 import type { QueryClient } from "@tanstack/react-query"
 import type { Session } from "#/server/auth"
@@ -35,21 +55,14 @@ const RootDocument = () => (
 			<HeadContent />
 		</head>
 		<body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
-			<PostHogProvider>
-				<TanStackQueryProvider>
-					<Outlet />
-					<TanStackDevtools
-						config={{ position: "bottom-right" }}
-						plugins={[
-							{
-								name: "Tanstack Router",
-								render: <TanStackRouterDevtoolsPanel />,
-							},
-							TanStackQueryDevtools,
-						]}
-					/>
-				</TanStackQueryProvider>
-			</PostHogProvider>
+			<Suspense>
+				<PostHogProvider>
+					<TanStackQueryProvider>
+						<Outlet />
+						<Suspense><TanStackDevtools /></Suspense>
+					</TanStackQueryProvider>
+				</PostHogProvider>
+			</Suspense>
 			<Toaster />
 			<Scripts />
 		</body>
@@ -57,9 +70,14 @@ const RootDocument = () => (
 )
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-	beforeLoad: async () => {
+	validateSearch: z.object({
+		lang: z.enum(["en", "id"]).optional(),
+	}),
+	beforeLoad: async ({ search }) => {
+		const locale = search.lang ?? "en"
+		setLocale(locale as "en" | "id")
 		if (typeof document !== "undefined") {
-			document.documentElement.setAttribute("lang", getLocale())
+			document.documentElement.setAttribute("lang", locale)
 		}
 		const session = await getSessionFn()
 		return { session }
