@@ -1,5 +1,6 @@
 import * as React from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import {
 	flexRender,
 	getCoreRowModel,
@@ -58,9 +59,9 @@ interface RoleRow {
 }
 
 const BUILT_IN_VARIANTS: Record<string, "default" | "secondary" | "outline"> = {
-	"super-admin": "default",
+	owner: "default",
 	admin: "secondary",
-	user: "outline",
+	member: "outline",
 }
 
 type RoleSheetState =
@@ -71,7 +72,7 @@ type RoleSheetState =
 export function RolesOverview({ users }: { users: UserRow[] }) {
 	const [activeTab, setActiveTab] = React.useState<string>("all")
 	const [createUserSheetOpen, setCreateUserSheetOpen] = React.useState(false)
-	const [createUserSheetRole, setCreateUserSheetRole] = React.useState<AppRole>("user")
+	const [createUserSheetRole, setCreateUserSheetRole] = React.useState<AppRole>("member")
 	const [roleSheet, setRoleSheet] = React.useState<RoleSheetState>({ open: false })
 
 	const canSetRole = useHasPermission("user", ["set-role"])
@@ -82,14 +83,20 @@ export function RolesOverview({ users }: { users: UserRow[] }) {
 
 	const setRole = useMutation({
 		...orpc.admin.setRole.mutationOptions(),
-		onSuccess: () =>
-			queryClient.invalidateQueries({ queryKey: orpc.admin.listUsers.key() }),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: orpc.admin.listUsers.key() })
+			toast.success("Role updated")
+		},
+		onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to update role"),
 	})
 
 	const deleteRole = useMutation({
 		...orpc.admin.deleteRole.mutationOptions(),
-		onSuccess: () =>
-			queryClient.invalidateQueries({ queryKey: orpc.admin.listRoles.key() }),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: orpc.admin.listRoles.key() })
+			toast.success("Role deleted")
+		},
+		onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to delete role"),
 	})
 
 	// ── Role assignment tabs ──────────────────────────────────────────────
@@ -103,7 +110,7 @@ export function RolesOverview({ users }: { users: UserRow[] }) {
 		() =>
 			allRoleIds.reduce(
 				(acc, id) => {
-					acc[id] = users.filter((u) => (u.role ?? "user") === id).length
+					acc[id] = users.filter((u) => (u.role ?? "member") === id).length
 					return acc
 				},
 				{} as Record<string, number>,
@@ -115,7 +122,7 @@ export function RolesOverview({ users }: { users: UserRow[] }) {
 		() =>
 			activeTab === "all"
 				? users
-				: users.filter((u) => (u.role ?? "user") === activeTab),
+				: users.filter((u) => (u.role ?? "member") === activeTab),
 		[users, activeTab],
 	)
 

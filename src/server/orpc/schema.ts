@@ -14,7 +14,7 @@ const userPassword = z
 	.string()
 	.min(8, "Password must be at least 8 characters")
 	.max(72, "Password too long") // bcrypt effective limit
-const userRole = z.enum(["user", "admin", "super-admin"])
+const userRole = z.enum(["member", "admin", "owner"])
 
 // ─── Schemas ────────────────────────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ export const createUserSchema = z.object({
 	name: userName,
 	email: userEmail,
 	password: userPassword,
-	role: userRole.default("user"),
+	role: userRole.default("member"),
 })
 
 export const updateUserSchema = z
@@ -83,4 +83,14 @@ export const setRolePermissionSchema = z.object({
 	resource: z.string().min(1),
 	action: z.string().min(1),
 	granted: z.boolean(),
+})
+
+// ─── Activity log schemas ─────────────────────────────────────────────────────
+
+export const listActivityLogsSchema = z.object({
+	limit: z.number().int().min(1).max(200).default(50),
+	offset: z.number().int().min(0).default(0),
+	userId: z.string().optional(),
+	resource: z.string().optional(),
+	action: z.string().optional(),
 })

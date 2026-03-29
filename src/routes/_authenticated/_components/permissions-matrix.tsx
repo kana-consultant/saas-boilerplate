@@ -1,7 +1,9 @@
 import * as React from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 
 import { Badge } from "#/components/ui/badge"
+import { Button } from "#/components/ui/button"
 import {
 	Card,
 	CardContent,
@@ -33,6 +35,7 @@ const ACTION_LABELS: Record<string, string> = {
 	impersonate: "Impersonate",
 	"impersonate-admins": "Impersonate Admins",
 	revoke: "Revoke",
+	export: "Export",
 }
 
 const ACTION_DESCRIPTIONS: Record<string, string> = {
@@ -47,22 +50,25 @@ const ACTION_DESCRIPTIONS: Record<string, string> = {
 	impersonate: "Log in as another user",
 	"impersonate-admins": "Log in as an admin user",
 	revoke: "Revoke active sessions",
+	export: "Export data to CSV/JSON",
 }
 
 const RESOURCE_LABELS: Record<string, string> = {
 	user: "Users",
 	session: "Sessions",
+	"activity-log": "Activity Log",
 }
 
 const RESOURCE_DESCRIPTIONS: Record<string, string> = {
 	user: "Manage user accounts, roles, and access",
 	session: "Manage active login sessions",
+	"activity-log": "View and export system activity events",
 }
 
 const BUILT_IN_VARIANTS: Record<string, "default" | "secondary" | "outline"> = {
-	"super-admin": "default",
+	owner: "default",
 	admin: "secondary",
-	user: "outline",
+	member: "outline",
 }
 
 const ALL_ROWS = (
@@ -89,6 +95,8 @@ export function PermissionsMatrix() {
 	const permissions = permsData?.permissions ?? []
 
 	const [selectedRoleId, setSelectedRoleId] = React.useState<string>("")
+	const [pendingChanges, setPendingChanges] = React.useState<Map<string, boolean>>(new Map())
+	const [isSaving, setIsSaving] = React.useState(false)
 
 	React.useEffect(() => {
 		if (roles.length > 0 && !selectedRoleId) {
@@ -96,17 +104,16 @@ export function PermissionsMatrix() {
 		}
 	}, [roles, selectedRoleId])
 
+	// Clear pending changes when switching roles
+	React.useEffect(() => {
+		setPendingChanges(new Map())
+	}, [selectedRoleId])
+
 	const selectedRole = roles.find((r) => r.id === selectedRoleId)
 
-	const setPermission = useMutation({
-		...orpc.admin.setRolePermission.mutationOptions(),
-		onSuccess: () =>
-			queryClient.invalidateQueries({
-				queryKey: orpc.admin.listRolePermissions.key(),
-			}),
-	})
+	const setPermission = useMutation(orpc.admin.setRolePermission.mutationOptions())
 
-	const isGranted = (resource: string, action: string) =>
+	const isServerGranted = (resource: string, action: string) =>
 		permissions.some(
 			(p) =>
 				p.roleId === selectedRoleId &&
@@ -114,11 +121,60 @@ export function PermissionsMatrix() {
 				p.action === action,
 		)
 
+	const isGranted = (resource: string, action: string) => {
+		const key = `${resource}:${action}`
+		if (pendingChanges.has(key)) return pendingChanges.get(key)!
+		return isServerGranted(resource, action)
+	}
+
+	const handleToggle = (resource: string, action: string, checked: boolean) => {
+		const key = `${resource}:${action}`
+		const serverGranted = isServerGranted(resource, action)
+		setPendingChanges((prev) => {
+			const next = new Map(prev)
+			if (checked === serverGranted) {
+				next.delete(key)
+			} else {
+				next.set(key, checked)
+			}
+			return next
+		})
+	}
+
+	const handleSave = async () => {
+		setIsSaving(true)
+		try {
+			await Promise.all(
+				Array.from(pendingChanges.entries()).map(([key, granted]) => {
+					const colonIdx = key.indexOf(":")
+					const resource = key.slice(0, colonIdx)
+					const action = key.slice(colonIdx + 1)
+					return setPermission.mutateAsync({
+						roleId: selectedRoleId,
+						resource,
+						action,
+						granted,
+					})
+				}),
+			)
+			await queryClient.invalidateQueries({
+				queryKey: orpc.admin.listRolePermissions.key(),
+			})
+			setPendingChanges(new Map())
+			toast.success("Permissions saved")
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Failed to save permissions")
+		} finally {
+			setIsSaving(false)
+		}
+	}
+
 	const grantedCount = selectedRoleId
 		? ALL_ROWS.filter(({ resource, action }) => isGranted(resource, action)).length
 		: 0
 
 	const isLoading = rolesLoading || permsLoading
+	const hasPendingChanges = pendingChanges.size > 0
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -170,8 +226,38 @@ export function PermissionsMatrix() {
 
 			{!canEdit && (
 				<p className="text-muted-foreground text-sm">
-					Read-only. Only super-admins can modify permissions.
+					Read-only. Only owners can modify permissions.
 				</p>
+			)}
+
+			{/* Save bar */}
+			{canEdit && (
+				<div className="flex items-center justify-between rounded-lg border px-4 py-3">
+					<p className="text-sm text-muted-foreground">
+						{hasPendingChanges
+							? `${pendingChanges.size} unsaved change${pendingChanges.size === 1 ? "" : "s"}`
+							: "No pending changes"}
+					</p>
+					<div className="flex gap-2">
+						{hasPendingChanges && (
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => setPendingChanges(new Map())}
+								disabled={isSaving}
+							>
+								Discard
+							</Button>
+						)}
+						<Button
+							size="sm"
+							onClick={handleSave}
+							disabled={!hasPendingChanges || isSaving}
+						>
+							{isSaving ? "Saving…" : "Save changes"}
+						</Button>
+					</div>
+				</div>
 			)}
 
 			{/* Permission cards by resource */}
@@ -210,20 +296,7 @@ export function PermissionsMatrix() {
 								<CardContent className="flex flex-col gap-3">
 									{actions.map((action) => {
 										const granted = isGranted(resource as string, action)
-										const isPending =
-											setPermission.isPending &&
-											(
-												setPermission.variables as {
-													resource: string
-													action: string
-												} | undefined
-											)?.resource === resource &&
-											(
-												setPermission.variables as {
-													resource: string
-													action: string
-												} | undefined
-											)?.action === action
+										const isPending = pendingChanges.has(`${resource}:${action}`)
 
 										return (
 											<div
@@ -231,7 +304,7 @@ export function PermissionsMatrix() {
 												className="flex items-center justify-between"
 											>
 												<div>
-													<p className="text-sm font-medium">
+													<p className={`text-sm font-medium${isPending ? " text-primary" : ""}`}>
 														{ACTION_LABELS[action] ?? action}
 													</p>
 													{ACTION_DESCRIPTIONS[action] && (
@@ -242,14 +315,9 @@ export function PermissionsMatrix() {
 												</div>
 												<Switch
 													checked={granted}
-													disabled={!canEdit || isLoading || isPending}
+													disabled={!canEdit || isLoading || isSaving}
 													onCheckedChange={(checked) =>
-														setPermission.mutate({
-															roleId: selectedRoleId,
-															resource: resource as string,
-															action,
-															granted: checked,
-														})
+														handleToggle(resource as string, action, checked)
 													}
 												/>
 											</div>

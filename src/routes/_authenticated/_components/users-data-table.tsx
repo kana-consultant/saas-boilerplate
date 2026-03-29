@@ -12,6 +12,7 @@ import {
 } from "@tanstack/react-table"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { IconDotsVertical, IconPlus } from "@tabler/icons-react"
+import { toast } from "sonner"
 
 import { Badge } from "#/components/ui/badge"
 import { Button } from "#/components/ui/button"
@@ -70,15 +71,18 @@ export function UsersDataTable({ users }: { users: UserRow[] }) {
 
 	const banUser = useMutation({
 		...orpc.admin.banUser.mutationOptions(),
-		onSuccess: invalidateUsers,
+		onSuccess: () => { invalidateUsers(); toast.success("User banned") },
+		onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to ban user"),
 	})
 	const unbanUser = useMutation({
 		...orpc.admin.unbanUser.mutationOptions(),
-		onSuccess: invalidateUsers,
+		onSuccess: () => { invalidateUsers(); toast.success("User unbanned") },
+		onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to unban user"),
 	})
 	const setRole = useMutation({
 		...orpc.admin.setRole.mutationOptions(),
-		onSuccess: invalidateUsers,
+		onSuccess: () => { invalidateUsers(); toast.success("Role updated") },
+		onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to update role"),
 	})
 
 	const columns: ColumnDef<UserRow>[] = [
@@ -88,7 +92,7 @@ export function UsersDataTable({ users }: { users: UserRow[] }) {
 			accessorKey: "role",
 			header: "Role",
 			cell: ({ row }) => (
-				<Badge variant="outline">{row.original.role ?? "user"}</Badge>
+				<Badge variant="outline">{row.original.role ?? "member"}</Badge>
 			),
 		},
 		{
@@ -147,9 +151,9 @@ export function UsersDataTable({ users }: { users: UserRow[] }) {
 								<>
 									<DropdownMenuSeparator />
 									<DropdownMenuItem
-										onClick={() => setRole.mutate({ userId: user.id, role: "user" })}
+										onClick={() => setRole.mutate({ userId: user.id, role: "member" })}
 									>
-										Set role: user
+										Set role: member
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onClick={() => setRole.mutate({ userId: user.id, role: "admin" })}
@@ -158,10 +162,10 @@ export function UsersDataTable({ users }: { users: UserRow[] }) {
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onClick={() =>
-											setRole.mutate({ userId: user.id, role: "super-admin" })
+											setRole.mutate({ userId: user.id, role: "owner" })
 										}
 									>
-										Set role: super-admin
+										Set role: owner
 									</DropdownMenuItem>
 								</>
 							)}

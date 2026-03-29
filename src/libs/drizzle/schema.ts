@@ -101,22 +101,45 @@ export const verification = pgTable("verification", {
 	updatedAt: timestamp("updated_at").notNull().defaultNow(),
 })
 
-export const appRole = pgTable("app_role", {
+export const activityLog = pgTable("activity_log", {
 	id: text("id").primaryKey(),
-	label: text("label").notNull(),
-	description: text("description").notNull().default(""),
-	isSystem: boolean("is_system").notNull().default(false),
+	userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+	organizationId: text("organization_id").references(() => organization.id, {
+		onDelete: "set null",
+	}),
+	action: text("action").notNull(),
+	resource: text("resource").notNull(),
+	resourceId: text("resource_id"),
+	metadata: text("metadata"),
+	ipAddress: text("ip_address"),
+	userAgent: text("user_agent"),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 })
+
+export const appRole = pgTable(
+	"app_role",
+	{
+		id: text("id").notNull(),
+		organizationId: text("organization_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
+		label: text("label").notNull(),
+		description: text("description").notNull().default(""),
+		isSystem: boolean("is_system").notNull().default(false),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+	},
+	(t) => ({ pk: primaryKey({ columns: [t.id, t.organizationId] }) }),
+)
 
 export const rolePermission = pgTable(
 	"role_permission",
 	{
-		roleId: text("role_id")
+		roleId: text("role_id").notNull(),
+		organizationId: text("organization_id")
 			.notNull()
-			.references(() => appRole.id, { onDelete: "cascade" }),
+			.references(() => organization.id, { onDelete: "cascade" }),
 		resource: text("resource").notNull(),
 		action: text("action").notNull(),
 	},
-	(t) => ({ pk: primaryKey({ columns: [t.roleId, t.resource, t.action] }) }),
+	(t) => ({ pk: primaryKey({ columns: [t.roleId, t.organizationId, t.resource, t.action] }) }),
 )

@@ -1,6 +1,7 @@
 import * as React from "react"
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { z } from "zod"
 
 import { Badge } from "#/components/ui/badge"
@@ -68,7 +69,7 @@ function extractErrorMessage(error: unknown): string {
 export function UserFormSheet({
 	mode,
 	user,
-	defaultRole = "user",
+	defaultRole = "member",
 	open,
 	onOpenChange,
 }: UserFormSheetProps) {
@@ -83,7 +84,9 @@ export function UserFormSheet({
 		onSuccess: () => {
 			invalidate()
 			onOpenChange(false)
+			toast.success("User created")
 		},
+		onError: (err) => toast.error(extractErrorMessage(err)),
 	})
 
 	const updateUser = useMutation({
@@ -91,7 +94,9 @@ export function UserFormSheet({
 		onSuccess: () => {
 			invalidate()
 			onOpenChange(false)
+			toast.success("User updated")
 		},
+		onError: (err) => toast.error(extractErrorMessage(err)),
 	})
 
 	const deleteUser = useMutation({
@@ -99,7 +104,9 @@ export function UserFormSheet({
 		onSuccess: () => {
 			invalidate()
 			onOpenChange(false)
+			toast.success("User deleted")
 		},
+		onError: (err) => toast.error(extractErrorMessage(err)),
 	})
 
 	// ── Create form ──────────────────────────────────────────────────────
@@ -262,7 +269,7 @@ export function UserFormSheet({
 						<div className="flex flex-col gap-1.5">
 							<Label>Role</Label>
 							<Badge variant="outline" className="w-fit">
-								{user?.role ?? "user"}
+								{user?.role ?? "member"}
 							</Badge>
 							<p className="text-muted-foreground text-xs">
 								Change role from the Users table.
@@ -430,9 +437,9 @@ export function UserFormSheet({
 											<SelectValue placeholder="Select a role" />
 										</SelectTrigger>
 										<SelectContent>
-											<SelectItem value="user">User</SelectItem>
+											<SelectItem value="member">Member</SelectItem>
 											<SelectItem value="admin">Admin</SelectItem>
-											<SelectItem value="super-admin">Super Admin</SelectItem>
+											<SelectItem value="owner">Owner</SelectItem>
 										</SelectContent>
 									</Select>
 								</div>
