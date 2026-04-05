@@ -26,41 +26,96 @@
             DATABASE_URL = "postgresql://${dbUser}:${dbPass}@127.0.0.1:${pgPort}/${dbName}";
 
             shellHook = ''
+              # ── silence noisy warnings ────────────────────────────────────────
+              export NIX_SHELL_PRESERVE_PROMPT=1
+              export PNPM_SCRIPT_SHELL_MODE=quiet
+              export NO_UPDATE_NOTIFIER=1
+              export DISABLE_OPENCOLLECTIVE=1
+              export ADBLOCK=1
+
+              # ── postgres env ──────────────────────────────────────────────────
               export PGPORT="${pgPort}"
               export PGDATA="$HOME/.postgres-saas"
               export PGHOST="127.0.0.1"
               export PGLOGFILE="$PGDATA/logfile"
 
-              # Init data dir if needed
+              # Init data dir if needed (silent)
               if [ ! -d "$PGDATA" ]; then
-                echo "Initialising PostgreSQL data dir at $PGDATA..."
                 initdb -D "$PGDATA" --no-locale --encoding=UTF8 -A trust \
-                  --username=postgres -q
+                  --username=postgres -q 2>/dev/null
                 echo "listen_addresses = '127.0.0.1'" >> "$PGDATA/postgresql.conf"
-                echo "port = ${pgPort}" >> "$PGDATA/postgresql.conf"
+                echo "port = ${pgPort}"               >> "$PGDATA/postgresql.conf"
               fi
 
-              # Start postgres if not already running
-              if ! pg_isready -q -h 127.0.0.1 -p ${pgPort}; then
-                echo "Starting PostgreSQL on port ${pgPort}..."
-                pg_ctl -D "$PGDATA" -l "$PGLOGFILE" start -w -o "-p ${pgPort}" -o "-h 127.0.0.1"
+              # Start postgres if not already running (silent)
+              if ! pg_isready -q -h 127.0.0.1 -p ${pgPort} 2>/dev/null; then
+                pg_ctl -D "$PGDATA" -l "$PGLOGFILE" start -w \
+                  -o "-p ${pgPort}" -o "-h 127.0.0.1" \
+                  -s 2>/dev/null
               fi
 
-              # Ensure the role and database exist
+              # Ensure role and database exist (silent)
               psql -h 127.0.0.1 -p ${pgPort} -d postgres -tc \
-                "SELECT 1 FROM pg_roles WHERE rolname='${dbUser}'" \
+                "SELECT 1 FROM pg_roles WHERE rolname='${dbUser}'" 2>/dev/null \
                 | grep -q 1 || \
                 psql -h 127.0.0.1 -p ${pgPort} -d postgres \
-                  -c "CREATE USER ${dbUser} WITH PASSWORD '${dbPass}' CREATEDB;"
+                  -c "CREATE USER ${dbUser} WITH PASSWORD '${dbPass}' CREATEDB;" \
+                  >/dev/null 2>&1
 
               psql -h 127.0.0.1 -p ${pgPort} -d postgres -tc \
-                "SELECT 1 FROM pg_database WHERE datname='${dbName}'" \
+                "SELECT 1 FROM pg_database WHERE datname='${dbName}'" 2>/dev/null \
                 | grep -q 1 || \
                 psql -h 127.0.0.1 -p ${pgPort} -d postgres \
-                  -c "CREATE DATABASE ${dbName} OWNER ${dbUser};"
+                  -c "CREATE DATABASE ${dbName} OWNER ${dbUser};" \
+                  >/dev/null 2>&1
 
               export DATABASE_URL="postgresql://${dbUser}:${dbPass}@127.0.0.1:${pgPort}/${dbName}"
-              echo "✓ PostgreSQL ready — $DATABASE_URL"
+
+              # ── collect stats ─────────────────────────────────────────────────
+              _node_ver=$(node --version 2>/dev/null || echo "n/a")
+              _pnpm_ver=$(pnpm --version 2>/dev/null | sed 's/^/v/' || echo "n/a")
+              _pg_ver=$(psql --version 2>/dev/null | awk '{print $NF}' | sed 's/^/v/' || echo "n/a")
+              _git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "n/a")
+              _pkg_ver=$(node -p "require('./package.json').version" 2>/dev/null || echo "n/a")
+
+              # ── welcome banner ────────────────────────────────────────────────
+              printf '\033[2J\033[H'   # clear screen
+
+              printf '\033[1;36m'
+              printf '╔══════════════════════════════════════════════════════╗\n'
+              printf '║          ⚡  SaaS Boilerplate  — Dev Shell  ⚡       ║\n'
+              printf '╚══════════════════════════════════════════════════════╝\n'
+              printf '\033[0m'
+
+              printf '\n\033[1;33m  Welcome back! Environment is ready.\033[0m\n\n'
+
+              # stats table
+              printf '\033[1;34m  ┌─ Stats ──────────────────────────────────────────┐\033[0m\n'
+              printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "Project version" "v$_pkg_ver"
+              printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "Git branch"      "$_git_branch"
+              printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "Node.js"         "$_node_ver"
+              printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "pnpm"            "$_pnpm_ver"
+              printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "PostgreSQL"      "$_pg_ver"
+              printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "DB"              "${dbName}@127.0.0.1:${pgPort}"
+              printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "DB status"       "✓ running"
+              printf '\033[1;34m  └──────────────────────────────────────────────────┘\033[0m\n'
+
+              # available commands
+              printf '\n\033[1;34m  ┌─ Commands ────────────────────────────────────────┐\033[0m\n'
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm dev"          "start dev server  (port 3000)"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm build"         "production build"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm start"         "run production server"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm test"          "run test suite"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm lint"          "lint with Biome"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm check"         "format + lint check"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm db:migrate"    "run DB migrations"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm db:generate"   "generate migration files"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm db:studio"     "open Drizzle Studio"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm db:seed"       "seed the database"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm storybook"     "launch Storybook  (port 6006)"
+              printf '\033[1;34m  └──────────────────────────────────────────────────┘\033[0m\n\n'
+
+              unset _node_ver _pnpm_ver _pg_ver _git_branch _pkg_ver
             '';
           };
         });

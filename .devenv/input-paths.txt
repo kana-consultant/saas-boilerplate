@@ -1,0 +1,10 @@
+/Users/ms/.config/nixpkgs/overlays
+/Users/ms/.config/nixpkgs/overlays.nix
+/Users/ms/Development/saas-boilerplate/.devenv/bootstrap/bootstrapLib.nix
+/Users/ms/Development/saas-boilerplate/.devenv/bootstrap/default.nix
+/Users/ms/Development/saas-boilerplate/.devenv/bootstrap/resolve-lock.nix
+/Users/ms/Development/saas-boilerplate/devenv.local.nix
+/Users/ms/Development/saas-boilerplate/devenv.lock
+/Users/ms/Development/saas-boilerplate/devenv.nix
+/Users/ms/Development/saas-boilerplate/devenv.yaml
+/Users/ms/Development/saas-boilerplate/.env

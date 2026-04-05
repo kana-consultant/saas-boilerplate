@@ -1,0 +1,8 @@
+devenv:container:copy
+devenv:enterShell
+devenv:enterTest
+devenv:files
+devenv:files:cleanup
+devenv:processes:dev
+devenv:processes:postgres
+devenv:processes:redis
