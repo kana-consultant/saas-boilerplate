@@ -16,26 +16,56 @@ A full-stack SaaS starter built with TanStack Start, featuring multi-tenancy, ro
 | i18n | Paraglide v2 (EN + ID) |
 | Analytics | PostHog |
 | Linting | Biome |
-| Dev environment | devenv.sh + direnv |
+| Dev environment | devenv.sh + direnv (Mac/Linux), Docker + PowerShell (Windows) |
 
 ## Getting Started
 
-### Prerequisites
+### Mac / Linux (Nix)
 
 Install [devenv](https://devenv.sh) and [direnv](https://direnv.net), then:
 
 ```bash
 direnv allow   # starts Postgres + Redis automatically
 pnpm install
+cp .env.example .env.local   # edit with your values
+pnpm db:push
 ```
 
-Copy environment variables:
+### Windows (PowerShell)
 
-```bash
-cp .env.example .env.local
+Requires [Node.js 22+](https://nodejs.org/), [pnpm](https://pnpm.io/installation), and [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+**Option A: Setup script (recommended)**
+
+```powershell
+.\scripts\setup-windows.ps1
 ```
 
-Required variables:
+The script starts PostgreSQL + Redis via Docker, creates `.env.local` with an auto-generated `BETTER_AUTH_SECRET`, installs dependencies, and pushes the DB schema. Safe to re-run.
+
+**Option B: Manual**
+
+```powershell
+pnpm dev:services
+cp .env.example .env.local          # edit with your values
+pnpm install
+pnpm db:push
+```
+
+**Stopping services:**
+
+```powershell
+pnpm dev:services:stop              # stop, keep data
+docker compose -f docker-compose.dev.yml down -v   # stop + delete data
+```
+
+### VS Code Dev Container
+
+Open the project in VS Code and select **"Reopen in Container"** when prompted. This runs everything inside a Linux container with all tools pre-configured. Works on any OS with Docker Desktop.
+
+### Environment Variables
+
+See `.env.example` for all available variables. Required:
 
 ```env
 DATABASE_URL=postgresql://tanstack:tanstack@127.0.0.1:5432/tanstack_start_dev
@@ -135,11 +165,13 @@ pnpm db:seed       # seed demo data
 ## Scripts
 
 ```bash
-pnpm dev           # start dev server (port 3000)
-pnpm build         # production build
-pnpm start         # serve production build
-pnpm lint          # biome lint
-pnpm format        # biome format
-pnpm check         # biome check
-pnpm test          # vitest
+pnpm dev                # start dev server (port 3000)
+pnpm build              # production build
+pnpm start              # serve production build
+pnpm lint               # biome lint
+pnpm format             # biome format
+pnpm check              # biome check
+pnpm test               # vitest
+pnpm dev:services       # start PostgreSQL + Redis (Docker)
+pnpm dev:services:stop  # stop PostgreSQL + Redis
 ```

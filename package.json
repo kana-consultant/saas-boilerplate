@@ -22,7 +22,9 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "db:seed": "node --env-file=.env.local --import=tsx/esm src/libs/drizzle/seed.ts",
-    "start": "node server.mjs"
+    "start": "node server.mjs",
+    "dev:services": "docker compose -f docker-compose.dev.yml up -d",
+    "dev:services:stop": "docker compose -f docker-compose.dev.yml down"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -104,8 +106,10 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "core-js",
       "esbuild",
-      "lightningcss"
+      "lightningcss",
+      "protobufjs"
     ]
   }
 }
