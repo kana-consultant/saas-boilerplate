@@ -52,7 +52,10 @@ export function buildUseCases(deps: Dependencies) {
 			getSession: makeGetSession({ auth: deps.auth }),
 			listOrganizations: makeListOrganizations({ auth: deps.auth }),
 			getOrgRole: makeGetOrgRole({ memberRepo: deps.memberRepo }),
-			getDefaultOrg: makeGetDefaultOrg({ orgRepo: deps.orgRepo, cache: deps.cache }),
+			getDefaultOrg: makeGetDefaultOrg({
+				orgRepo: deps.orgRepo,
+				cache: deps.cache,
+			}),
 			getOrgContext: makeGetOrgContext({
 				orgRepo: deps.orgRepo,
 				memberRepo: deps.memberRepo,
@@ -94,9 +97,18 @@ export function buildUseCases(deps: Dependencies) {
 		},
 		role: {
 			list: makeListRoles({ roleRepo: deps.roleRepo }),
-			create: makeCreateRole({ roleRepo: deps.roleRepo, activityRepo: deps.activityRepo }),
-			update: makeUpdateRole({ roleRepo: deps.roleRepo, activityRepo: deps.activityRepo }),
-			delete: makeDeleteRole({ roleRepo: deps.roleRepo, activityRepo: deps.activityRepo }),
+			create: makeCreateRole({
+				roleRepo: deps.roleRepo,
+				activityRepo: deps.activityRepo,
+			}),
+			update: makeUpdateRole({
+				roleRepo: deps.roleRepo,
+				activityRepo: deps.activityRepo,
+			}),
+			delete: makeDeleteRole({
+				roleRepo: deps.roleRepo,
+				activityRepo: deps.activityRepo,
+			}),
 			listPermissions: makeListRolePermissions({
 				permRepo: deps.permRepo,
 				seedPermissions,

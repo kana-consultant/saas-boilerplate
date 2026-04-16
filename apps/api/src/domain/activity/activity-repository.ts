@@ -6,5 +6,7 @@ import type {
 
 export interface ActivityRepository {
 	insert(entry: ActivityLogEntry): Promise<void>
-	list(filters: ActivityLogFilters): Promise<{ logs: ActivityLogRecord[]; total: number }>
+	list(
+		filters: ActivityLogFilters,
+	): Promise<{ logs: ActivityLogRecord[]; total: number }>
 }

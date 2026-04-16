@@ -1,9 +1,9 @@
 import type { ActivityRepository } from "#/domain/activity/activity-repository.ts"
 import type { MemberRepository } from "#/domain/member/member-repository.ts"
 import type { AuthService } from "#/domain/ports/auth-service.ts"
+import { assertNotSelf, assertOutranksTarget } from "../shared/authorization.ts"
 import type { AuthedContext } from "../shared/context.ts"
 import { requireActiveOrg } from "../shared/context.ts"
-import { assertNotSelf, assertOutranksTarget } from "../shared/authorization.ts"
 
 export interface UpdateUserInput {
 	userId: string
@@ -25,7 +25,12 @@ export function makeUpdateUser(deps: UpdateUserDeps) {
 			"update via admin panel — use your profile page instead",
 		)
 		const activeOrgId = requireActiveOrg(ctx)
-		await assertOutranksTarget(deps.memberRepo, ctx.orgRole, input.userId, activeOrgId)
+		await assertOutranksTarget(
+			deps.memberRepo,
+			ctx.orgRole,
+			input.userId,
+			activeOrgId,
+		)
 
 		const { userId, ...data } = input
 		await deps.auth.updateUser(userId, data, { headers: ctx.headers })

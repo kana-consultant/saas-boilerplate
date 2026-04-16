@@ -1,7 +1,7 @@
 import type { PermissionRepository } from "#/domain/role/role-repository.ts"
 import type { AuthedContext } from "../shared/context.ts"
 import { requireActiveOrg } from "../shared/context.ts"
-import { makeSeedPermissions } from "./seed-permissions.ts"
+import type { makeSeedPermissions } from "./seed-permissions.ts"
 
 export interface ListRolePermissionsDeps {
 	permRepo: PermissionRepository

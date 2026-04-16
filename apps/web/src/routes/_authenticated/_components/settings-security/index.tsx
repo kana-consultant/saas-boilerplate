@@ -90,7 +90,9 @@ export function SettingsSecurity() {
 					</form.Field>
 
 					{submitError && (
-						<p className="text-destructive text-sm" role="alert">{submitError}</p>
+						<p className="text-destructive text-sm" role="alert">
+							{submitError}
+						</p>
 					)}
 
 					<div>

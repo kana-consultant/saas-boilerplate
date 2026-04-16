@@ -13,7 +13,10 @@ export interface RoleRow {
 	isSystem: boolean
 }
 
-export const BUILT_IN_VARIANTS: Record<string, "default" | "secondary" | "outline"> = {
+export const BUILT_IN_VARIANTS: Record<
+	string,
+	"default" | "secondary" | "outline"
+> = {
 	owner: "default",
 	admin: "secondary",
 	member: "outline",

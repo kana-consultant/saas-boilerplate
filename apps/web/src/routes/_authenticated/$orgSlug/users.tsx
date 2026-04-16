@@ -1,6 +1,6 @@
-import * as React from "react"
-import { createFileRoute, redirect } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import type * as React from "react"
 import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar"
 
 import { orpc } from "#/libs/orpc/client"

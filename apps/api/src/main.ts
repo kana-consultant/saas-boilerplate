@@ -5,20 +5,23 @@ import { resolve } from "node:path"
 
 import { serve } from "@hono/node-server"
 import { serveStatic } from "@hono/node-server/serve-static"
-import { Hono } from "hono"
-import { cors } from "hono/cors"
+import { SmartCoercionPlugin } from "@orpc/json-schema"
+import { OpenAPIHandler } from "@orpc/openapi/fetch"
+import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins"
 import { onError } from "@orpc/server"
 import { RPCHandler } from "@orpc/server/fetch"
-import { OpenAPIHandler } from "@orpc/openapi/fetch"
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4"
-import { SmartCoercionPlugin } from "@orpc/json-schema"
-import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins"
-import { P, match } from "ts-pattern"
+import { Hono } from "hono"
+import { cors } from "hono/cors"
+import { match, P } from "ts-pattern"
 
 import { buildUseCases } from "#/application/use-cases.ts"
 import type { AppRole } from "#/domain/role/permissions.ts"
 import { PLATFORM_SUPER_ADMIN } from "#/domain/role/permissions.ts"
 import type { Session } from "#/domain/session/session.ts"
+import { createAuthService } from "#/infrastructure/auth/auth-service.ts"
+import { buildAuth } from "#/infrastructure/auth/better-auth.ts"
+import { createRedisCache } from "#/infrastructure/cache/redis.ts"
 import { createDb } from "#/infrastructure/db/client.ts"
 import { createActivityRepository } from "#/infrastructure/db/repositories/activity-repository.ts"
 import { createMemberRepository } from "#/infrastructure/db/repositories/member-repository.ts"
@@ -28,9 +31,6 @@ import {
 	createRoleRepository,
 } from "#/infrastructure/db/repositories/role-repository.ts"
 import { createUserRepository } from "#/infrastructure/db/repositories/user-repository.ts"
-import { createRedisCache } from "#/infrastructure/cache/redis.ts"
-import { buildAuth } from "#/infrastructure/auth/better-auth.ts"
-import { createAuthService } from "#/infrastructure/auth/auth-service.ts"
 import { buildRouter } from "#/presentation/routers/index.ts"
 
 const db = createDb(process.env.DATABASE_URL!)
@@ -42,7 +42,9 @@ const orgRepo = createOrganizationRepository(db)
 const roleRepo = createRoleRepository(db)
 const permRepo = createPermissionRepository(db)
 
-const cache = createRedisCache(process.env.REDIS_URL ?? "redis://127.0.0.1:6379")
+const cache = createRedisCache(
+	process.env.REDIS_URL ?? "redis://127.0.0.1:6379",
+)
 
 const betterAuthInstance = buildAuth({ db, activityRepo })
 const auth = createAuthService(betterAuthInstance)
@@ -79,11 +81,17 @@ app.on(["GET", "POST"], "/auth/*", (c) => auth.handler(c.req.raw))
 const resolveOrgRole = (session: Session | null): Promise<AppRole | null> =>
 	match(session)
 		.with(null, async () => null)
-		.with({ user: { role: PLATFORM_SUPER_ADMIN } }, async (): Promise<AppRole> => "owner")
+		.with(
+			{ user: { role: PLATFORM_SUPER_ADMIN } },
+			async (): Promise<AppRole> => "owner",
+		)
 		.with(
 			{ session: { activeOrganizationId: P.string } },
 			async (s) =>
-				(await memberRepo.findRole(s.user.id, s.session.activeOrganizationId)) as AppRole | null,
+				(await memberRepo.findRole(
+					s.user.id,
+					s.session.activeOrganizationId,
+				)) as AppRole | null,
 		)
 		.otherwise(async () => null)
 

@@ -1,9 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-
-import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 import { orpc } from "#/libs/orpc/client"
 import { useForm } from "#/libs/tanstack-form"
+import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 import {
 	createUserSchema,
 	extractErrorMessage,

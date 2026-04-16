@@ -1,5 +1,5 @@
-import type { AuthService } from "#/domain/ports/auth-service.ts"
 import type { Organization } from "#/domain/organization/organization.ts"
+import type { AuthService } from "#/domain/ports/auth-service.ts"
 import type { Session } from "#/domain/session/session.ts"
 import type { BetterAuth } from "./better-auth.ts"
 
@@ -21,7 +21,6 @@ export function createAuthService(auth: BetterAuth): AuthService {
 					name: input.name,
 					email: input.email,
 					password: input.password,
-					...(input.role ? { role: input.role } : {}),
 				},
 				headers: ctx.headers,
 			})

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react"
 import { IconTrash } from "@tabler/icons-react"
 import { useNavigate } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -161,10 +161,15 @@ export function OrgSettingsGeneral() {
 					)}
 				</form.Field>
 
-				{submitError && <p className="text-sm text-destructive">{submitError}</p>}
+				{submitError && (
+					<p className="text-sm text-destructive">{submitError}</p>
+				)}
 
 				<form.Subscribe
-					selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
+					selector={(s) => ({
+						canSubmit: s.canSubmit,
+						isSubmitting: s.isSubmitting,
+					})}
 				>
 					{({ canSubmit, isSubmitting }) => (
 						<Button type="submit" disabled={!canSubmit || isSubmitting}>

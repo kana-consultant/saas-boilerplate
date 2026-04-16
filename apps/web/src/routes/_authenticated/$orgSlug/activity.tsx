@@ -1,12 +1,8 @@
-import * as React from "react"
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { IconRefresh } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
-import {
-	IconRefresh,
-} from "@tabler/icons-react"
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import type * as React from "react"
 import { z } from "zod"
-import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar"
-
 import { Button } from "#/components/ui/button"
 import {
 	Select,
@@ -15,10 +11,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#/components/ui/select"
+import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar"
 import { orpc } from "#/libs/orpc/client"
+import { ActivityTable } from "../_components/activity-table"
 import { AppSidebar } from "../_components/app-sidebar"
 import { SiteHeader } from "../_components/site-header"
-import { ActivityTable } from "../_components/activity-table"
 
 const searchSchema = z.object({
 	page: z.number().int().min(1).default(1).catch(1),
@@ -83,7 +80,9 @@ function ActivityPage() {
 							<div>
 								<h1 className="text-2xl font-semibold">Activity Log</h1>
 								<p className="text-sm text-muted-foreground">
-									{total > 0 ? `${total} event${total === 1 ? "" : "s"} recorded` : "No events recorded yet"}
+									{total > 0
+										? `${total} event${total === 1 ? "" : "s"} recorded`
+										: "No events recorded yet"}
 								</p>
 							</div>
 							<Button
@@ -92,7 +91,9 @@ function ActivityPage() {
 								onClick={() => refetch()}
 								disabled={isFetching}
 							>
-								<IconRefresh className={`size-4 ${isFetching ? "animate-spin" : ""}`} />
+								<IconRefresh
+									className={`size-4 ${isFetching ? "animate-spin" : ""}`}
+								/>
 								Refresh
 							</Button>
 						</div>
@@ -100,7 +101,9 @@ function ActivityPage() {
 						<div className="flex flex-wrap gap-2">
 							<Select
 								value={resource ?? "all"}
-								onValueChange={(v) => setFilter("resource", v === "all" ? undefined : v)}
+								onValueChange={(v) =>
+									setFilter("resource", v === "all" ? undefined : v)
+								}
 							>
 								<SelectTrigger className="h-8 w-40 text-xs">
 									<SelectValue placeholder="All resources" />
@@ -108,14 +111,18 @@ function ActivityPage() {
 								<SelectContent>
 									<SelectItem value="all">All resources</SelectItem>
 									{RESOURCES.map((r) => (
-										<SelectItem key={r} value={r}>{r}</SelectItem>
+										<SelectItem key={r} value={r}>
+											{r}
+										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
 
 							<Select
 								value={action ?? "all"}
-								onValueChange={(v) => setFilter("action", v === "all" ? undefined : v)}
+								onValueChange={(v) =>
+									setFilter("action", v === "all" ? undefined : v)
+								}
 							>
 								<SelectTrigger className="h-8 w-36 text-xs">
 									<SelectValue placeholder="All actions" />
@@ -123,7 +130,9 @@ function ActivityPage() {
 								<SelectContent>
 									<SelectItem value="all">All actions</SelectItem>
 									{ACTIONS.map((a) => (
-										<SelectItem key={a} value={a}>{a}</SelectItem>
+										<SelectItem key={a} value={a}>
+											{a}
+										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
@@ -134,8 +143,12 @@ function ActivityPage() {
 							isLoading={isLoading}
 							page={page}
 							totalPages={totalPages}
-							onPrevPage={() => navigate({ search: (prev) => ({ ...prev, page: page - 1 }) })}
-							onNextPage={() => navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })}
+							onPrevPage={() =>
+								navigate({ search: (prev) => ({ ...prev, page: page - 1 }) })
+							}
+							onNextPage={() =>
+								navigate({ search: (prev) => ({ ...prev, page: page + 1 }) })
+							}
 						/>
 					</div>
 				</div>

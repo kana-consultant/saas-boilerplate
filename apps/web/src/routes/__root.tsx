@@ -1,14 +1,12 @@
+import type { Session } from "@saas/api"
+import type { QueryClient } from "@tanstack/react-query"
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router"
 import { lazy, Suspense } from "react"
-import { Outlet, createRootRouteWithContext } from "@tanstack/react-router"
 import { Toaster } from "sonner"
 import { z } from "zod"
-
-import { setLocale } from "#/libs/paraglide"
 import { client } from "#/libs/orpc/client"
+import { setLocale } from "#/libs/paraglide"
 import TanStackQueryProvider from "#/libs/tanstack-query/root-provider"
-
-import type { QueryClient } from "@tanstack/react-query"
-import type { Session } from "@saas/api"
 
 const PostHogProvider = lazy(() => import("#/libs/posthog/provider"))
 
@@ -18,17 +16,26 @@ const TanStackDevtools = import.meta.env.DEV
 				import("@tanstack/react-devtools"),
 				import("@tanstack/react-router-devtools"),
 				import("#/libs/tanstack-query/devtools"),
-			]).then(([{ TanStackDevtools }, { TanStackRouterDevtoolsPanel }, TanStackQueryDevtools]) => ({
-				default: () => (
-					<TanStackDevtools
-						config={{ position: "bottom-right" }}
-						plugins={[
-							{ name: "Tanstack Router", render: <TanStackRouterDevtoolsPanel /> },
-							TanStackQueryDevtools.default,
-						]}
-					/>
-				),
-			})),
+			]).then(
+				([
+					{ TanStackDevtools },
+					{ TanStackRouterDevtoolsPanel },
+					TanStackQueryDevtools,
+				]) => ({
+					default: () => (
+						<TanStackDevtools
+							config={{ position: "bottom-right" }}
+							plugins={[
+								{
+									name: "Tanstack Router",
+									render: <TanStackRouterDevtoolsPanel />,
+								},
+								TanStackQueryDevtools.default,
+							]}
+						/>
+					),
+				}),
+			),
 		)
 	: () => null
 

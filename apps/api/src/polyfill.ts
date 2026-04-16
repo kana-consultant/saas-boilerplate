@@ -1,5 +1,5 @@
-import { File } from 'node:buffer'
+import { File } from "node:buffer"
 
-if (typeof globalThis.File === 'undefined') {
-  globalThis.File = File as any
+if (typeof globalThis.File === "undefined") {
+	globalThis.File = File as any
 }

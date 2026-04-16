@@ -32,7 +32,8 @@ export function useSettingsSecurity() {
 				toast.success("Password changed")
 				form.reset()
 			} catch (err) {
-				const msg = err instanceof Error ? err.message : "Failed to change password"
+				const msg =
+					err instanceof Error ? err.message : "Failed to change password"
 				setSubmitError(msg)
 				toast.error(msg)
 			}

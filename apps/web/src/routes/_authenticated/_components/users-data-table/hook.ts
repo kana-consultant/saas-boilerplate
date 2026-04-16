@@ -1,24 +1,25 @@
-import * as React from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
+	type ColumnFiltersState,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
-	useReactTable,
-	type ColumnFiltersState,
 	type SortingState,
+	useReactTable,
 } from "@tanstack/react-table"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import * as React from "react"
 import { toast } from "sonner"
-
-import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 import { orpc } from "#/libs/orpc/client"
+import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 import { getUserColumns } from "../user-table-columns"
-import { type UserRow, type SheetState } from "./schema"
+import type { SheetState, UserRow } from "./schema"
 
 export function useUsersDataTable(users: UserRow[]) {
 	const [sorting, setSorting] = React.useState<SortingState>([])
-	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+		[],
+	)
 	const [sheet, setSheet] = React.useState<SheetState>({ open: false })
 
 	const canSetRole = useHasPermission("user", ["set-role"])
@@ -30,18 +31,30 @@ export function useUsersDataTable(users: UserRow[]) {
 
 	const banUser = useMutation({
 		...orpc.admin.banUser.mutationOptions(),
-		onSuccess: () => { invalidateUsers(); toast.success("User banned") },
-		onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to ban user"),
+		onSuccess: () => {
+			invalidateUsers()
+			toast.success("User banned")
+		},
+		onError: (err) =>
+			toast.error(err instanceof Error ? err.message : "Failed to ban user"),
 	})
 	const unbanUser = useMutation({
 		...orpc.admin.unbanUser.mutationOptions(),
-		onSuccess: () => { invalidateUsers(); toast.success("User unbanned") },
-		onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to unban user"),
+		onSuccess: () => {
+			invalidateUsers()
+			toast.success("User unbanned")
+		},
+		onError: (err) =>
+			toast.error(err instanceof Error ? err.message : "Failed to unban user"),
 	})
 	const setRole = useMutation({
 		...orpc.admin.setRole.mutationOptions(),
-		onSuccess: () => { invalidateUsers(); toast.success("Role updated") },
-		onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to update role"),
+		onSuccess: () => {
+			invalidateUsers()
+			toast.success("Role updated")
+		},
+		onError: (err) =>
+			toast.error(err instanceof Error ? err.message : "Failed to update role"),
 	})
 
 	const columns = getUserColumns({

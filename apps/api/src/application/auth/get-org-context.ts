@@ -1,9 +1,9 @@
-import { match } from "ts-pattern"
+import { match, P } from "ts-pattern"
 
 import type { MemberRepository } from "#/domain/member/member-repository.ts"
+import type { Organization } from "#/domain/organization/organization.ts"
 import type { OrganizationRepository } from "#/domain/organization/organization-repository.ts"
 import type { Cache } from "#/domain/ports/cache.ts"
-import type { Organization } from "#/domain/organization/organization.ts"
 import type { AppRole } from "#/domain/role/permissions.ts"
 import { PLATFORM_SUPER_ADMIN } from "#/domain/role/permissions.ts"
 import type { OptionalAuthContext } from "../shared/context.ts"
@@ -42,8 +42,9 @@ export function makeGetOrgContext(deps: GetOrgContextDeps) {
 		})()
 
 		return match({ session: ctx.session, org })
+			.returnType<Promise<OrgContextResult | null>>()
 			.with({ session: null }, async () => null)
-			.with({ org: null }, async ({ session }) => {
+			.with({ session: P.nonNullable, org: null }, async ({ session }) => {
 				const firstOrg = await deps.orgRepo.findFirstForUser(session.user.id)
 				return {
 					org: null,
@@ -52,24 +53,34 @@ export function makeGetOrgContext(deps: GetOrgContextDeps) {
 				}
 			})
 			.with(
-				{ session: { user: { role: PLATFORM_SUPER_ADMIN } } },
+				{
+					session: { user: { role: PLATFORM_SUPER_ADMIN } },
+					org: P.nonNullable,
+				},
 				async ({ org: matchedOrg }) => ({
 					org: matchedOrg,
 					orgRole: "owner" as const,
 					redirectSlug: null,
 				}),
 			)
-			.otherwise(async ({ session, org: matchedOrg }) => {
-				const roleKey = `member:role:${session.user.id}:${matchedOrg.id}`
-				const cachedRole = await deps.cache.get<AppRole>(roleKey)
-				const orgRole =
-					cachedRole ??
-					(await (async () => {
-						const r = await deps.memberRepo.findRole(session.user.id, matchedOrg.id)
-						if (r) await deps.cache.set(roleKey, r, ROLE_TTL)
-						return r
-					})())
-				return { org: matchedOrg, orgRole, redirectSlug: null }
-			})
+			.with(
+				{ session: P.nonNullable, org: P.nonNullable },
+				async ({ session, org: matchedOrg }) => {
+					const roleKey = `member:role:${session.user.id}:${matchedOrg.id}`
+					const cachedRole = await deps.cache.get<AppRole>(roleKey)
+					const orgRole =
+						cachedRole ??
+						(await (async () => {
+							const r = await deps.memberRepo.findRole(
+								session.user.id,
+								matchedOrg.id,
+							)
+							if (r) await deps.cache.set(roleKey, r, ROLE_TTL)
+							return r
+						})())
+					return { org: matchedOrg, orgRole, redirectSlug: null }
+				},
+			)
+			.otherwise(async () => null)
 	}
 }

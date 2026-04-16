@@ -1,5 +1,5 @@
-import * as React from "react"
 import { useRouter } from "@tanstack/react-router"
+import * as React from "react"
 import { toast } from "sonner"
 
 import { authClient } from "#/libs/auth/client"
@@ -20,7 +20,8 @@ export function useSettingsProfile({ name }: { name: string }) {
 				await router.invalidate()
 				toast.success("Profile updated")
 			} catch (err) {
-				const msg = err instanceof Error ? err.message : "Failed to update profile"
+				const msg =
+					err instanceof Error ? err.message : "Failed to update profile"
 				setSubmitError(msg)
 				toast.error(msg)
 			}

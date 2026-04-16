@@ -1,14 +1,14 @@
-import * as React from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
 import {
+	type ColumnDef,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
 	useReactTable,
-	type ColumnDef,
 } from "@tanstack/react-table"
+import * as React from "react"
+import { toast } from "sonner"
 
 import { Badge } from "#/components/ui/badge"
 import {
@@ -18,16 +18,24 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#/components/ui/select"
-import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 import type { AppRole } from "#/libs/auth/permissions"
 import { orpc } from "#/libs/orpc/client"
-import { BUILT_IN_VARIANTS, type UserRow, type RoleRow, type RoleSheetState } from "./schema"
+import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
+import {
+	BUILT_IN_VARIANTS,
+	type RoleRow,
+	type RoleSheetState,
+	type UserRow,
+} from "./schema"
 
 export function useRolesOverview(users: UserRow[]) {
 	const [activeTab, setActiveTab] = React.useState<string>("all")
 	const [createUserSheetOpen, setCreateUserSheetOpen] = React.useState(false)
-	const [createUserSheetRole, setCreateUserSheetRole] = React.useState<AppRole>("member")
-	const [roleSheet, setRoleSheet] = React.useState<RoleSheetState>({ open: false })
+	const [createUserSheetRole, setCreateUserSheetRole] =
+		React.useState<AppRole>("member")
+	const [roleSheet, setRoleSheet] = React.useState<RoleSheetState>({
+		open: false,
+	})
 
 	const canSetRole = useHasPermission("user", ["set-role"])
 	const queryClient = useQueryClient()
@@ -41,7 +49,8 @@ export function useRolesOverview(users: UserRow[]) {
 			queryClient.invalidateQueries({ queryKey: orpc.admin.listUsers.key() })
 			toast.success("Role updated")
 		},
-		onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to update role"),
+		onError: (err) =>
+			toast.error(err instanceof Error ? err.message : "Failed to update role"),
 	})
 
 	const allRoleIds = React.useMemo(
@@ -101,7 +110,10 @@ export function useRolesOverview(users: UserRow[]) {
 							<Select
 								value={row.original.role ?? "user"}
 								onValueChange={(value) =>
-									setRole.mutate({ userId: row.original.id, role: value as AppRole })
+									setRole.mutate({
+										userId: row.original.id,
+										role: value as AppRole,
+									})
 								}
 							>
 								<SelectTrigger className="w-36">

@@ -1,12 +1,6 @@
-import {
-	closestCenter,
-	DndContext,
-} from "@dnd-kit/core"
+import { closestCenter, DndContext } from "@dnd-kit/core"
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
-import {
-	SortableContext,
-	verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import {
 	IconChevronDown,
 	IconChevronLeft,
@@ -17,7 +11,7 @@ import {
 	IconPlus,
 } from "@tabler/icons-react"
 import { flexRender } from "@tanstack/react-table"
-import { z } from "zod"
+import type { z } from "zod"
 
 import { Badge } from "#/components/ui/badge"
 import { Button } from "#/components/ui/button"
@@ -43,26 +37,35 @@ import {
 	TableHeader,
 	TableRow,
 } from "#/components/ui/table"
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from "#/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs"
 import { columns, DraggableRow, schema } from "../data-table-columns"
 import { useDataTable } from "./hook"
 
 export { schema }
 
-export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[] }) {
-	const { table, sensors, sortableId, dataIds, handleDragEnd } = useDataTable(initialData)
+export function DataTable({
+	data: initialData,
+}: {
+	data: z.infer<typeof schema>[]
+}) {
+	const { table, sensors, sortableId, dataIds, handleDragEnd } =
+		useDataTable(initialData)
 
 	return (
-		<Tabs defaultValue="outline" className="w-full flex-col justify-start gap-6">
+		<Tabs
+			defaultValue="outline"
+			className="w-full flex-col justify-start gap-6"
+		>
 			<div className="flex items-center justify-between px-4 lg:px-6">
-				<Label htmlFor="view-selector" className="sr-only">View</Label>
+				<Label htmlFor="view-selector" className="sr-only">
+					View
+				</Label>
 				<Select defaultValue="outline">
-					<SelectTrigger className="flex w-fit @4xl/main:hidden" size="sm" id="view-selector">
+					<SelectTrigger
+						className="flex w-fit @4xl/main:hidden"
+						size="sm"
+						id="view-selector"
+					>
 						<SelectValue placeholder="Select a view" />
 					</SelectTrigger>
 					<SelectContent>
@@ -95,13 +98,18 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
 						<DropdownMenuContent align="end" className="w-56">
 							{table
 								.getAllColumns()
-								.filter((col) => typeof col.accessorFn !== "undefined" && col.getCanHide())
+								.filter(
+									(col) =>
+										typeof col.accessorFn !== "undefined" && col.getCanHide(),
+								)
 								.map((column) => (
 									<DropdownMenuCheckboxItem
 										key={column.id}
 										className="capitalize"
 										checked={column.getIsVisible()}
-										onCheckedChange={(value) => column.toggleVisibility(!!value)}
+										onCheckedChange={(value) =>
+											column.toggleVisibility(!!value)
+										}
 									>
 										{column.id}
 									</DropdownMenuCheckboxItem>
@@ -115,7 +123,10 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
 				</div>
 			</div>
 
-			<TabsContent value="outline" className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
+			<TabsContent
+				value="outline"
+				className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
+			>
 				<div className="overflow-hidden rounded-lg border">
 					<DndContext
 						collisionDetection={closestCenter}
@@ -132,7 +143,10 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
 											<TableHead key={header.id} colSpan={header.colSpan}>
 												{header.isPlaceholder
 													? null
-													: flexRender(header.column.columnDef.header, header.getContext())}
+													: flexRender(
+															header.column.columnDef.header,
+															header.getContext(),
+														)}
 											</TableHead>
 										))}
 									</TableRow>
@@ -140,14 +154,20 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
 							</TableHeader>
 							<TableBody className="**:data-[slot=table-cell]:first:w-8">
 								{table.getRowModel().rows?.length ? (
-									<SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
+									<SortableContext
+										items={dataIds}
+										strategy={verticalListSortingStrategy}
+									>
 										{table.getRowModel().rows.map((row) => (
 											<DraggableRow key={row.id} row={row} />
 										))}
 									</SortableContext>
 								) : (
 									<TableRow>
-										<TableCell colSpan={columns.length} className="h-24 text-center">
+										<TableCell
+											colSpan={columns.length}
+											className="h-24 text-center"
+										>
 											No results.
 										</TableCell>
 									</TableRow>
@@ -164,38 +184,68 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
 					</div>
 					<div className="flex w-full items-center gap-8 lg:w-fit">
 						<div className="hidden items-center gap-2 lg:flex">
-							<Label htmlFor="rows-per-page" className="text-sm font-medium">Rows per page</Label>
+							<Label htmlFor="rows-per-page" className="text-sm font-medium">
+								Rows per page
+							</Label>
 							<Select
 								value={`${table.getState().pagination.pageSize}`}
 								onValueChange={(value) => table.setPageSize(Number(value))}
 							>
 								<SelectTrigger size="sm" className="w-20" id="rows-per-page">
-									<SelectValue placeholder={table.getState().pagination.pageSize} />
+									<SelectValue
+										placeholder={table.getState().pagination.pageSize}
+									/>
 								</SelectTrigger>
 								<SelectContent side="top">
 									{[10, 20, 30, 40, 50].map((pageSize) => (
-										<SelectItem key={pageSize} value={`${pageSize}`}>{pageSize}</SelectItem>
+										<SelectItem key={pageSize} value={`${pageSize}`}>
+											{pageSize}
+										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
 						</div>
 						<div className="flex w-fit items-center justify-center text-sm font-medium">
-							Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+							Page {table.getState().pagination.pageIndex + 1} of{" "}
+							{table.getPageCount()}
 						</div>
 						<div className="ml-auto flex items-center gap-2 lg:ml-0">
-							<Button variant="outline" className="hidden h-8 w-8 p-0 lg:flex" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
+							<Button
+								variant="outline"
+								className="hidden h-8 w-8 p-0 lg:flex"
+								onClick={() => table.setPageIndex(0)}
+								disabled={!table.getCanPreviousPage()}
+							>
 								<span className="sr-only">Go to first page</span>
 								<IconChevronsLeft />
 							</Button>
-							<Button variant="outline" className="size-8" size="icon" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+							<Button
+								variant="outline"
+								className="size-8"
+								size="icon"
+								onClick={() => table.previousPage()}
+								disabled={!table.getCanPreviousPage()}
+							>
 								<span className="sr-only">Go to previous page</span>
 								<IconChevronLeft />
 							</Button>
-							<Button variant="outline" className="size-8" size="icon" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+							<Button
+								variant="outline"
+								className="size-8"
+								size="icon"
+								onClick={() => table.nextPage()}
+								disabled={!table.getCanNextPage()}
+							>
 								<span className="sr-only">Go to next page</span>
 								<IconChevronRight />
 							</Button>
-							<Button variant="outline" className="hidden size-8 lg:flex" size="icon" onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}>
+							<Button
+								variant="outline"
+								className="hidden size-8 lg:flex"
+								size="icon"
+								onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+								disabled={!table.getCanNextPage()}
+							>
 								<span className="sr-only">Go to last page</span>
 								<IconChevronsRight />
 							</Button>
@@ -204,13 +254,19 @@ export function DataTable({ data: initialData }: { data: z.infer<typeof schema>[
 				</div>
 			</TabsContent>
 
-			<TabsContent value="past-performance" className="flex flex-col px-4 lg:px-6">
+			<TabsContent
+				value="past-performance"
+				className="flex flex-col px-4 lg:px-6"
+			>
 				<div className="aspect-video w-full flex-1 rounded-lg border border-dashed" />
 			</TabsContent>
 			<TabsContent value="key-personnel" className="flex flex-col px-4 lg:px-6">
 				<div className="aspect-video w-full flex-1 rounded-lg border border-dashed" />
 			</TabsContent>
-			<TabsContent value="focus-documents" className="flex flex-col px-4 lg:px-6">
+			<TabsContent
+				value="focus-documents"
+				className="flex flex-col px-4 lg:px-6"
+			>
 				<div className="aspect-video w-full flex-1 rounded-lg border border-dashed" />
 			</TabsContent>
 		</Tabs>

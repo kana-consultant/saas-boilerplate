@@ -1,5 +1,5 @@
-import * as React from "react"
 import { createFileRoute, redirect } from "@tanstack/react-router"
+import type * as React from "react"
 import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar"
 
 import { AppSidebar } from "../_components/app-sidebar"

@@ -1,7 +1,11 @@
 import { z } from "zod"
 
 const userId = z.string().min(1, "User ID is required")
-const userName = z.string().min(1, "Name is required").max(100, "Name too long").trim()
+const userName = z
+	.string()
+	.min(1, "Name is required")
+	.max(100, "Name too long")
+	.trim()
 const userEmail = z
 	.string()
 	.email("Invalid email address")
@@ -49,9 +53,16 @@ const roleSlug = z
 	.string()
 	.min(2, "Role ID must be at least 2 characters")
 	.max(50, "Role ID too long")
-	.regex(/^[a-z0-9-]+$/, "Role ID must use lowercase letters, numbers, and hyphens only")
+	.regex(
+		/^[a-z0-9-]+$/,
+		"Role ID must use lowercase letters, numbers, and hyphens only",
+	)
 	.trim()
-const roleLabel = z.string().min(1, "Label is required").max(100, "Label too long").trim()
+const roleLabel = z
+	.string()
+	.min(1, "Label is required")
+	.max(100, "Label too long")
+	.trim()
 const roleDescription = z.string().max(500, "Description too long").trim()
 
 export const createRoleSchema = z.object({

@@ -1,9 +1,9 @@
 import type { ActivityRepository } from "#/domain/activity/activity-repository.ts"
 import type { MemberRepository } from "#/domain/member/member-repository.ts"
 import type { AuthService } from "#/domain/ports/auth-service.ts"
+import { assertOutranksTarget } from "../shared/authorization.ts"
 import type { AuthedContext } from "../shared/context.ts"
 import { requireActiveOrg } from "../shared/context.ts"
-import { assertOutranksTarget } from "../shared/authorization.ts"
 
 export interface UnbanUserInput {
 	userId: string
@@ -18,7 +18,12 @@ export interface UnbanUserDeps {
 export function makeUnbanUser(deps: UnbanUserDeps) {
 	return async (input: UnbanUserInput, ctx: AuthedContext) => {
 		const activeOrgId = requireActiveOrg(ctx)
-		await assertOutranksTarget(deps.memberRepo, ctx.orgRole, input.userId, activeOrgId)
+		await assertOutranksTarget(
+			deps.memberRepo,
+			ctx.orgRole,
+			input.userId,
+			activeOrgId,
+		)
 
 		await deps.auth.unbanUser(input.userId, { headers: ctx.headers })
 		await deps.activityRepo.insert({

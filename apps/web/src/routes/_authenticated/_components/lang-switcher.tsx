@@ -1,5 +1,5 @@
-import { useNavigate, useSearch } from "@tanstack/react-router"
 import { IconLanguage } from "@tabler/icons-react"
+import { useNavigate, useSearch } from "@tanstack/react-router"
 
 import {
 	DropdownMenu,
@@ -25,7 +25,8 @@ export function LangSwitcher() {
 	const search = useSearch({ strict: false }) as { lang?: string }
 	const current = search.lang ?? "en"
 
-	const currentLabel = LOCALES.find((l) => l.value === current)?.label ?? "English"
+	const currentLabel =
+		LOCALES.find((l) => l.value === current)?.label ?? "English"
 
 	return (
 		<SidebarMenu>

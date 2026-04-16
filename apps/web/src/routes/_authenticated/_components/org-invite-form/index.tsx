@@ -17,9 +17,12 @@ import {
 } from "#/components/ui/select"
 import { FieldError } from "#/libs/tanstack-form"
 import { useOrgInviteForm } from "./hook"
-import { ROLES, type OrgInviteFormProps, type OrgRole } from "./schema"
+import { type OrgInviteFormProps, type OrgRole, ROLES } from "./schema"
 
-export function OrgInviteForm({ organizationId, onInvited }: OrgInviteFormProps) {
+export function OrgInviteForm({
+	organizationId,
+	onInvited,
+}: OrgInviteFormProps) {
 	const { form, inviteError } = useOrgInviteForm({ organizationId, onInvited })
 
 	return (
@@ -41,7 +44,9 @@ export function OrgInviteForm({ organizationId, onInvited }: OrgInviteFormProps)
 					<form.Field name="email">
 						{(field) => (
 							<div className="flex-1 space-y-1">
-								<Label htmlFor="invite-email" className="sr-only">Email</Label>
+								<Label htmlFor="invite-email" className="sr-only">
+									Email
+								</Label>
 								<Input
 									id="invite-email"
 									type="email"

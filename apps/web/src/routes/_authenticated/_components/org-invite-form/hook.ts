@@ -3,9 +3,12 @@ import { toast } from "sonner"
 
 import { authClient } from "#/libs/auth/client"
 import { useForm } from "#/libs/tanstack-form"
-import { orgInviteSchema, type OrgInviteFormProps } from "./schema"
+import { type OrgInviteFormProps, orgInviteSchema } from "./schema"
 
-export function useOrgInviteForm({ organizationId, onInvited }: OrgInviteFormProps) {
+export function useOrgInviteForm({
+	organizationId,
+	onInvited,
+}: OrgInviteFormProps) {
 	const [inviteError, setInviteError] = useState<string | null>(null)
 
 	const form = useForm({

@@ -23,9 +23,15 @@ export function createActivityRepository(db: Db): ActivityRepository {
 		async list(filters) {
 			const conditions = [
 				eq(schema.activityLog.organizationId, filters.organizationId),
-				filters.userId ? eq(schema.activityLog.userId, filters.userId) : undefined,
-				filters.resource ? eq(schema.activityLog.resource, filters.resource) : undefined,
-				filters.action ? eq(schema.activityLog.action, filters.action) : undefined,
+				filters.userId
+					? eq(schema.activityLog.userId, filters.userId)
+					: undefined,
+				filters.resource
+					? eq(schema.activityLog.resource, filters.resource)
+					: undefined,
+				filters.action
+					? eq(schema.activityLog.action, filters.action)
+					: undefined,
 			].filter(Boolean)
 
 			const where = conditions.length > 0 ? and(...conditions) : undefined

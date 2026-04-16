@@ -1,9 +1,6 @@
 import type { UseCases } from "#/application/use-cases.ts"
 import { publicProcedure, toOptionalAuthContext } from "../orpc/middleware.ts"
-import {
-	getOrgContextSchema,
-	getOrgRoleSchema,
-} from "../orpc/schemas.ts"
+import { getOrgContextSchema, getOrgRoleSchema } from "../orpc/schemas.ts"
 
 export function buildAuthRouter(useCases: UseCases["auth"]) {
 	return {

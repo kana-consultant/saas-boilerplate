@@ -31,7 +31,10 @@ export function OrgSwitcher() {
 
 	const handleSwitchOrg = async (org: { id: string; slug: string | null }) => {
 		await authClient.organization.setActive({ organizationId: org.id })
-		navigate({ to: "/$orgSlug/dashboard", params: { orgSlug: org.slug ?? org.id } })
+		navigate({
+			to: "/$orgSlug/dashboard",
+			params: { orgSlug: org.slug ?? org.id },
+		})
 	}
 
 	return (
@@ -39,9 +42,7 @@ export function OrgSwitcher() {
 			<SidebarMenuItem>
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<SidebarMenuButton
-							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-						>
+						<SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
 							{activeOrg?.logo ? (
 								<img
 									src={activeOrg.logo}
@@ -84,9 +85,7 @@ export function OrgSwitcher() {
 							</DropdownMenuItem>
 						))}
 						{orgs && orgs.length > 0 && <DropdownMenuSeparator />}
-						<DropdownMenuItem
-							onClick={() => navigate({ to: "/org/create" })}
-						>
+						<DropdownMenuItem onClick={() => navigate({ to: "/org/create" })}>
 							<IconPlus className="size-4" />
 							Create Organization
 						</DropdownMenuItem>

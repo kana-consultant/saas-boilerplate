@@ -13,8 +13,11 @@ import {
 	SheetTitle,
 } from "#/components/ui/sheet"
 import { FieldError } from "#/libs/tanstack-form"
-import { extractErrorMessage, type UserFormSheetProps } from "../user-form-helpers"
 import { UserFormCreate } from "../user-form-create"
+import {
+	extractErrorMessage,
+	type UserFormSheetProps,
+} from "../user-form-helpers"
 import { useUserFormSheet } from "./hook"
 
 export function UserFormSheet({
@@ -24,7 +27,11 @@ export function UserFormSheet({
 	open,
 	onOpenChange,
 }: UserFormSheetProps) {
-	const { editForm, updateUser, deleteUser } = useUserFormSheet({ mode, user, onOpenChange })
+	const { editForm, updateUser, deleteUser } = useUserFormSheet({
+		mode,
+		user,
+		onOpenChange,
+	})
 
 	return match(mode)
 		.with("delete", () => (
@@ -47,7 +54,9 @@ export function UserFormSheet({
 						)}
 					</div>
 					<SheetFooter>
-						<Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+						<Button variant="outline" onClick={() => onOpenChange(false)}>
+							Cancel
+						</Button>
 						<Button
 							variant="destructive"
 							disabled={deleteUser.isPending}
@@ -114,8 +123,12 @@ export function UserFormSheet({
 
 						<div className="flex flex-col gap-1.5">
 							<Label>Role</Label>
-							<Badge variant="outline" className="w-fit">{user?.role ?? "member"}</Badge>
-							<p className="text-muted-foreground text-xs">Change role from the Users table.</p>
+							<Badge variant="outline" className="w-fit">
+								{user?.role ?? "member"}
+							</Badge>
+							<p className="text-muted-foreground text-xs">
+								Change role from the Users table.
+							</p>
 						</div>
 
 						{updateUser.error && (
@@ -125,7 +138,11 @@ export function UserFormSheet({
 						)}
 
 						<SheetFooter className="px-0">
-							<Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+							<Button
+								variant="outline"
+								type="button"
+								onClick={() => onOpenChange(false)}
+							>
 								Cancel
 							</Button>
 							<editForm.Subscribe
@@ -146,7 +163,11 @@ export function UserFormSheet({
 			</Sheet>
 		))
 		.with("create", () => (
-			<UserFormCreate defaultRole={defaultRole} open={open} onOpenChange={onOpenChange} />
+			<UserFormCreate
+				defaultRole={defaultRole}
+				open={open}
+				onOpenChange={onOpenChange}
+			/>
 		))
 		.exhaustive()
 }

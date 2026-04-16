@@ -1,6 +1,11 @@
-import * as React from "react"
-import { createFileRoute, Link, useParams, useSearch } from "@tanstack/react-router"
 import { IconBuilding, IconUsersGroup } from "@tabler/icons-react"
+import {
+	createFileRoute,
+	Link,
+	useParams,
+	useSearch,
+} from "@tanstack/react-router"
+import type * as React from "react"
 import { z } from "zod"
 
 import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar"
@@ -24,7 +29,9 @@ const NAV_ITEMS = [
 ]
 
 function OrgSettingsPage() {
-	const { orgSlug } = useParams({ from: "/_authenticated/$orgSlug/org/settings" })
+	const { orgSlug } = useParams({
+		from: "/_authenticated/$orgSlug/org/settings",
+	})
 	const { tab } = useSearch({ from: "/_authenticated/$orgSlug/org/settings" })
 
 	return (

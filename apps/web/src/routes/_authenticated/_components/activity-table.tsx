@@ -15,7 +15,10 @@ import {
 	TableRow,
 } from "#/components/ui/table"
 
-export const ACTION_COLORS: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+export const ACTION_COLORS: Record<
+	string,
+	"default" | "secondary" | "outline" | "destructive"
+> = {
 	create: "default",
 	update: "secondary",
 	delete: "destructive",
@@ -122,11 +125,17 @@ export function ActivityTable({
 										<TableCell>
 											{log.userName ? (
 												<div>
-													<p className="text-sm font-medium leading-none">{log.userName}</p>
-													<p className="text-xs text-muted-foreground">{log.userEmail}</p>
+													<p className="text-sm font-medium leading-none">
+														{log.userName}
+													</p>
+													<p className="text-xs text-muted-foreground">
+														{log.userEmail}
+													</p>
 												</div>
 											) : (
-												<span className="text-xs text-muted-foreground">System</span>
+												<span className="text-xs text-muted-foreground">
+													System
+												</span>
 											)}
 										</TableCell>
 										<TableCell>

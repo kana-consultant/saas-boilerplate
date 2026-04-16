@@ -72,7 +72,8 @@ export function buildAuth({ db, activityRepo }: BuildAuthDeps) {
 							.insert({
 								userId: session.userId,
 								organizationId:
-									(session.activeOrganizationId as string | null | undefined) ?? null,
+									(session.activeOrganizationId as string | null | undefined) ??
+									null,
 								action: "sign-out",
 								resource: "session",
 								resourceId: session.id,

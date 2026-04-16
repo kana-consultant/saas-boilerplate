@@ -6,11 +6,7 @@ import {
 	IconGripVertical,
 	IconLoader,
 } from "@tabler/icons-react"
-import {
-	flexRender,
-	type ColumnDef,
-	type Row,
-} from "@tanstack/react-table"
+import { type ColumnDef, flexRender, type Row } from "@tanstack/react-table"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -139,7 +135,9 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
 					})
 				}}
 			>
-				<Label htmlFor={`${row.original.id}-target`} className="sr-only">Target</Label>
+				<Label htmlFor={`${row.original.id}-target`} className="sr-only">
+					Target
+				</Label>
 				<Input
 					className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
 					defaultValue={row.original.target}
@@ -162,7 +160,9 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
 					})
 				}}
 			>
-				<Label htmlFor={`${row.original.id}-limit`} className="sr-only">Limit</Label>
+				<Label htmlFor={`${row.original.id}-limit`} className="sr-only">
+					Limit
+				</Label>
 				<Input
 					className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
 					defaultValue={row.original.limit}
@@ -179,7 +179,9 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
 			if (isAssigned) return row.original.reviewer
 			return (
 				<>
-					<Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">Reviewer</Label>
+					<Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">
+						Reviewer
+					</Label>
 					<Select>
 						<SelectTrigger
 							className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
@@ -190,7 +192,9 @@ export const columns: ColumnDef<z.infer<typeof schema>>[] = [
 						</SelectTrigger>
 						<SelectContent align="end">
 							<SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-							<SelectItem value="Jamik Tashpulatov">Jamik Tashpulatov</SelectItem>
+							<SelectItem value="Jamik Tashpulatov">
+								Jamik Tashpulatov
+							</SelectItem>
 						</SelectContent>
 					</Select>
 				</>

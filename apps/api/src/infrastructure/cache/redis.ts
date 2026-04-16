@@ -46,7 +46,13 @@ export function createRedisCache(url: string): Cache {
 				const redis = getClient()
 				let cursor = "0"
 				do {
-					const [next, keys] = await redis.scan(cursor, "MATCH", pattern, "COUNT", 100)
+					const [next, keys] = await redis.scan(
+						cursor,
+						"MATCH",
+						pattern,
+						"COUNT",
+						100,
+					)
 					cursor = next
 					if (keys.length) await redis.del(...keys)
 				} while (cursor !== "0")

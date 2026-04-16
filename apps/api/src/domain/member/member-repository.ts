@@ -9,5 +9,9 @@ export interface MemberRepository {
 		role: AppRole
 		createdAt?: Date
 	}): Promise<void>
-	updateRole(userId: string, organizationId: string, role: AppRole): Promise<void>
+	updateRole(
+		userId: string,
+		organizationId: string,
+		role: AppRole,
+	): Promise<void>
 }

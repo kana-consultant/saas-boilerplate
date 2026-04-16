@@ -1,5 +1,5 @@
-import * as React from "react"
 import { useRouter } from "@tanstack/react-router"
+import * as React from "react"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -28,7 +28,12 @@ interface ProfileFormProps {
 	createdAt: Date
 }
 
-export function ProfileForm({ name, email, role, createdAt }: ProfileFormProps) {
+export function ProfileForm({
+	name,
+	email,
+	role,
+	createdAt,
+}: ProfileFormProps) {
 	const router = useRouter()
 	const [submitError, setSubmitError] = React.useState<string | null>(null)
 
@@ -42,7 +47,8 @@ export function ProfileForm({ name, email, role, createdAt }: ProfileFormProps) 
 				await router.invalidate()
 				toast.success("Profile updated")
 			} catch (err) {
-				const msg = err instanceof Error ? err.message : "Failed to update profile"
+				const msg =
+					err instanceof Error ? err.message : "Failed to update profile"
 				setSubmitError(msg)
 				toast.error(msg)
 			}

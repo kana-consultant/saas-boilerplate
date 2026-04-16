@@ -1,5 +1,10 @@
+import {
+	createFileRoute,
+	Outlet,
+	redirect,
+	useParams,
+} from "@tanstack/react-router"
 import { useEffect } from "react"
-import { Outlet, createFileRoute, redirect, useParams } from "@tanstack/react-router"
 
 import { authClient } from "#/libs/auth/client"
 import { client } from "#/libs/orpc/client"
@@ -12,7 +17,10 @@ export const Route = createFileRoute("/_authenticated/$orgSlug")({
 		if (!ctx) throw redirect({ to: "/auth/login" })
 		if (!ctx.org) {
 			if (!ctx.redirectSlug) throw redirect({ to: "/org/create" })
-			throw redirect({ to: "/$orgSlug/dashboard", params: { orgSlug: ctx.redirectSlug } })
+			throw redirect({
+				to: "/$orgSlug/dashboard",
+				params: { orgSlug: ctx.redirectSlug },
+			})
 		}
 		return { orgRole: ctx.orgRole }
 	},

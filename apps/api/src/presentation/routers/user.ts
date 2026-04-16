@@ -21,11 +21,15 @@ export function buildUserRouter(useCases: UseCases["user"]) {
 
 		banUser: adminProcedure
 			.input(banUserSchema)
-			.handler(({ input, context }) => useCases.ban(input, toAuthedContext(context))),
+			.handler(({ input, context }) =>
+				useCases.ban(input, toAuthedContext(context)),
+			),
 
 		unbanUser: adminProcedure
 			.input(unbanUserSchema)
-			.handler(({ input, context }) => useCases.unban(input, toAuthedContext(context))),
+			.handler(({ input, context }) =>
+				useCases.unban(input, toAuthedContext(context)),
+			),
 
 		setRole: ownerProcedure
 			.input(setRoleSchema)

@@ -13,11 +13,24 @@ import {
 } from "#/components/ui/sheet"
 import { Textarea } from "#/components/ui/textarea"
 import { FieldError } from "#/libs/tanstack-form"
-import { extractErrorMessage, type RoleFormSheetProps } from "../role-form-helpers"
+import {
+	extractErrorMessage,
+	type RoleFormSheetProps,
+} from "../role-form-helpers"
 import { useRoleFormSheet } from "./hook"
 
-export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetProps) {
-	const { form, mutation } = useRoleFormSheet({ mode, role, open, onOpenChange })
+export function RoleFormSheet({
+	mode,
+	role,
+	open,
+	onOpenChange,
+}: RoleFormSheetProps) {
+	const { form, mutation } = useRoleFormSheet({
+		mode,
+		role,
+		open,
+		onOpenChange,
+	})
 
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
@@ -58,7 +71,8 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 										aria-invalid={field.state.meta.errors.length > 0}
 									/>
 									<p className="text-muted-foreground text-xs">
-										Lowercase letters, numbers, hyphens. Cannot be changed later.
+										Lowercase letters, numbers, hyphens. Cannot be changed
+										later.
 									</p>
 									<FieldError field={field} />
 								</div>
@@ -110,7 +124,11 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 					)}
 
 					<SheetFooter className="px-0">
-						<Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+						<Button
+							variant="outline"
+							type="button"
+							onClick={() => onOpenChange(false)}
+						>
 							Cancel
 						</Button>
 						<form.Subscribe
@@ -122,8 +140,14 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 							{({ canSubmit, isSubmitting }) => (
 								<Button type="submit" disabled={!canSubmit || isSubmitting}>
 									{match({ mode, isSubmitting })
-										.with({ mode: "create", isSubmitting: true }, () => "Creating…")
-										.with({ mode: "create", isSubmitting: false }, () => "Create")
+										.with(
+											{ mode: "create", isSubmitting: true },
+											() => "Creating…",
+										)
+										.with(
+											{ mode: "create", isSubmitting: false },
+											() => "Create",
+										)
 										.with({ mode: "edit", isSubmitting: true }, () => "Saving…")
 										.with({ mode: "edit", isSubmitting: false }, () => "Save")
 										.exhaustive()}

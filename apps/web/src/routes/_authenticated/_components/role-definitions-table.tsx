@@ -12,8 +12,8 @@ import {
 	TableHeader,
 	TableRow,
 } from "#/components/ui/table"
-import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 import { orpc } from "#/libs/orpc/client"
+import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 
 interface RoleRow {
 	id: string
@@ -34,7 +34,11 @@ interface RoleDefinitionsTableProps {
 	onCreate: () => void
 }
 
-export function RoleDefinitionsTable({ roleDefinitions, onEdit, onCreate }: RoleDefinitionsTableProps) {
+export function RoleDefinitionsTable({
+	roleDefinitions,
+	onEdit,
+	onCreate,
+}: RoleDefinitionsTableProps) {
 	const queryClient = useQueryClient()
 	const canSetRole = useHasPermission("user", ["set-role"])
 
@@ -44,7 +48,8 @@ export function RoleDefinitionsTable({ roleDefinitions, onEdit, onCreate }: Role
 			queryClient.invalidateQueries({ queryKey: orpc.admin.listRoles.key() })
 			toast.success("Role deleted")
 		},
-		onError: (err) => toast.error(err instanceof Error ? err.message : "Failed to delete role"),
+		onError: (err) =>
+			toast.error(err instanceof Error ? err.message : "Failed to delete role"),
 	})
 
 	return (
@@ -78,7 +83,10 @@ export function RoleDefinitionsTable({ roleDefinitions, onEdit, onCreate }: Role
 					<TableBody>
 						{roleDefinitions.length === 0 ? (
 							<TableRow>
-								<TableCell colSpan={5} className="h-16 text-center text-sm text-muted-foreground">
+								<TableCell
+									colSpan={5}
+									className="h-16 text-center text-sm text-muted-foreground"
+								>
 									Loading roles…
 								</TableCell>
 							</TableRow>

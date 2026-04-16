@@ -2,7 +2,7 @@ import { toast } from "sonner"
 
 import { authClient } from "#/libs/auth/client"
 import { useActiveOrganization } from "#/routes/_public/auth/_hooks/use-active-organization"
-import { type OrgRole, type Member, type Invitation } from "./schema"
+import type { Invitation, Member, OrgRole } from "./schema"
 
 export function useOrgMembers() {
 	const { data: activeOrg, refetch } = useActiveOrganization()
@@ -13,7 +13,9 @@ export function useOrgMembers() {
 	}
 
 	const members = fullOrg?.members ?? []
-	const invitations = (fullOrg?.invitations ?? []).filter((i) => i.status === "pending")
+	const invitations = (fullOrg?.invitations ?? []).filter(
+		(i) => i.status === "pending",
+	)
 
 	const handleChangeRole = async (memberId: string, role: OrgRole) => {
 		if (!activeOrg) return
@@ -45,7 +47,9 @@ export function useOrgMembers() {
 	}
 
 	const handleCancelInvitation = async (invitationId: string) => {
-		const { error } = await authClient.organization.cancelInvitation({ invitationId })
+		const { error } = await authClient.organization.cancelInvitation({
+			invitationId,
+		})
 		if (error) {
 			toast.error(error.message ?? "Failed to cancel invitation")
 		} else {

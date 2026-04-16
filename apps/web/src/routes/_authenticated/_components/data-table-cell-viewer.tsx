@@ -1,13 +1,12 @@
+import { IconTrendingUp } from "@tabler/icons-react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-import { z } from "zod"
-
-import { useIsMobile } from "#/libs/hooks/use-mobile"
+import type { z } from "zod"
 import { Button } from "#/components/ui/button"
 import {
+	type ChartConfig,
 	ChartContainer,
 	ChartTooltip,
 	ChartTooltipContent,
-	type ChartConfig,
 } from "#/components/ui/chart"
 import {
 	Drawer,
@@ -29,8 +28,8 @@ import {
 	SelectValue,
 } from "#/components/ui/select"
 import { Separator } from "#/components/ui/separator"
-import { IconTrendingUp } from "@tabler/icons-react"
-import { schema } from "./data-table-columns"
+import { useIsMobile } from "#/libs/hooks/use-mobile"
+import type { schema } from "./data-table-columns"
 
 export const chartData = [
 	{ month: "January", desktop: 186, mobile: 80 },
@@ -59,7 +58,9 @@ export function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 			<DrawerContent>
 				<DrawerHeader className="gap-1">
 					<DrawerTitle>{item.header}</DrawerTitle>
-					<DrawerDescription>Showing total visitors for the last 6 months</DrawerDescription>
+					<DrawerDescription>
+						Showing total visitors for the last 6 months
+					</DrawerDescription>
 				</DrawerHeader>
 				<div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
 					{!isMobile && (
@@ -79,7 +80,10 @@ export function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 										tickFormatter={(value) => value.slice(0, 3)}
 										hide
 									/>
-									<ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+									<ChartTooltip
+										cursor={false}
+										content={<ChartTooltipContent indicator="dot" />}
+									/>
 									<Area
 										dataKey="mobile"
 										type="natural"
@@ -101,7 +105,8 @@ export function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 							<Separator />
 							<div className="grid gap-2">
 								<div className="flex gap-2 leading-none font-medium">
-									Trending up by 5.2% this month <IconTrendingUp className="size-4" />
+									Trending up by 5.2% this month{" "}
+									<IconTrendingUp className="size-4" />
 								</div>
 								<div className="text-muted-foreground">
 									Showing total visitors for the last 6 months.
@@ -123,12 +128,20 @@ export function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 										<SelectValue placeholder="Select a type" />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="Table of Contents">Table of Contents</SelectItem>
-										<SelectItem value="Executive Summary">Executive Summary</SelectItem>
-										<SelectItem value="Technical Approach">Technical Approach</SelectItem>
+										<SelectItem value="Table of Contents">
+											Table of Contents
+										</SelectItem>
+										<SelectItem value="Executive Summary">
+											Executive Summary
+										</SelectItem>
+										<SelectItem value="Technical Approach">
+											Technical Approach
+										</SelectItem>
 										<SelectItem value="Design">Design</SelectItem>
 										<SelectItem value="Capabilities">Capabilities</SelectItem>
-										<SelectItem value="Focus Documents">Focus Documents</SelectItem>
+										<SelectItem value="Focus Documents">
+											Focus Documents
+										</SelectItem>
 										<SelectItem value="Narrative">Narrative</SelectItem>
 										<SelectItem value="Cover Page">Cover Page</SelectItem>
 									</SelectContent>
@@ -166,7 +179,9 @@ export function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-									<SelectItem value="Jamik Tashpulatov">Jamik Tashpulatov</SelectItem>
+									<SelectItem value="Jamik Tashpulatov">
+										Jamik Tashpulatov
+									</SelectItem>
 									<SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
 								</SelectContent>
 							</Select>

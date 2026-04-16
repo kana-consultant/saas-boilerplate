@@ -1,9 +1,8 @@
-import * as React from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import * as React from "react"
 import { toast } from "sonner"
-
-import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 import { orpc } from "#/libs/orpc/client"
+import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 import { ALL_ROWS } from "../permissions-constants"
 
 export function usePermissionsMatrix() {
@@ -21,7 +20,9 @@ export function usePermissionsMatrix() {
 	const permissions = permsData?.permissions ?? []
 
 	const [selectedRoleId, setSelectedRoleId] = React.useState<string>("")
-	const [pendingChanges, setPendingChanges] = React.useState<Map<string, boolean>>(new Map())
+	const [pendingChanges, setPendingChanges] = React.useState<
+		Map<string, boolean>
+	>(new Map())
 	const [isSaving, setIsSaving] = React.useState(false)
 
 	React.useEffect(() => {
@@ -35,7 +36,9 @@ export function usePermissionsMatrix() {
 	}, [selectedRoleId])
 
 	const selectedRole = roles.find((r) => r.id === selectedRoleId)
-	const setPermission = useMutation(orpc.admin.setRolePermission.mutationOptions())
+	const setPermission = useMutation(
+		orpc.admin.setRolePermission.mutationOptions(),
+	)
 
 	const isServerGranted = (resource: string, action: string) =>
 		permissions.some(
@@ -87,14 +90,17 @@ export function usePermissionsMatrix() {
 			setPendingChanges(new Map())
 			toast.success("Permissions saved")
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Failed to save permissions")
+			toast.error(
+				err instanceof Error ? err.message : "Failed to save permissions",
+			)
 		} finally {
 			setIsSaving(false)
 		}
 	}
 
 	const grantedCount = selectedRoleId
-		? ALL_ROWS.filter(({ resource, action }) => isGranted(resource, action)).length
+		? ALL_ROWS.filter(({ resource, action }) => isGranted(resource, action))
+				.length
 		: 0
 
 	const isLoading = rolesLoading || permsLoading

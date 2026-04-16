@@ -42,7 +42,10 @@ export const RESOURCE_DESCRIPTIONS: Record<string, string> = {
 	"activity-log": "View and export system activity events",
 }
 
-export const BUILT_IN_VARIANTS: Record<string, "default" | "secondary" | "outline"> = {
+export const BUILT_IN_VARIANTS: Record<
+	string,
+	"default" | "secondary" | "outline"
+> = {
 	owner: "default",
 	admin: "secondary",
 	member: "outline",

@@ -1,5 +1,5 @@
+import type { Icon } from "@tabler/icons-react"
 import { Link, useRouterState } from "@tanstack/react-router"
-import { type Icon } from "@tabler/icons-react"
 
 import {
 	SidebarGroup,

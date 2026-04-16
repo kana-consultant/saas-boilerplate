@@ -1,2 +1,2 @@
-export { Store } from '@tanstack/store'
-export { useStore } from '@tanstack/react-store'
+export { useStore } from "@tanstack/react-store"
+export { Store } from "@tanstack/store"

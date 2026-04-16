@@ -19,7 +19,8 @@ export function FieldError({
 	const message =
 		typeof first === "string"
 			? first
-			: (first as { message?: string } | null | undefined)?.message ?? "Invalid value"
+			: ((first as { message?: string } | null | undefined)?.message ??
+				"Invalid value")
 
 	return (
 		<p role="alert" className={className ?? "text-destructive text-sm"}>

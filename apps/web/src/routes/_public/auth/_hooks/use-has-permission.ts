@@ -8,13 +8,14 @@ export const useHasPermission = (
 	actions: string[],
 ): boolean => {
 	const { data: session } = authClient.useSession()
-	if (!session?.user) return false
+	const { data: activeOrg } = authClient.useActiveOrganization()
 
+	if (!session?.user) return false
 	if (session.user.role === PLATFORM_SUPER_ADMIN) return true
 
-	const { data: activeOrg } = authClient.useActiveOrganization()
-	const membership = (activeOrg as { members?: { userId: string; role: string }[] } | null)
-		?.members?.find((m) => m.userId === session.user.id)
+	const membership = (
+		activeOrg as { members?: { userId: string; role: string }[] } | null
+	)?.members?.find((m) => m.userId === session.user.id)
 	const role = membership?.role as AppRole | undefined
 	if (!role) return false
 	const roleObj = roles[role]

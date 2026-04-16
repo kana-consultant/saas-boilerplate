@@ -1,4 +1,3 @@
-import * as React from "react"
 import {
 	IconActivity,
 	IconBuilding,
@@ -15,6 +14,7 @@ import {
 	IconUsersGroup,
 } from "@tabler/icons-react"
 import { useParams } from "@tanstack/react-router"
+import type * as React from "react"
 
 import {
 	Sidebar,
@@ -22,15 +22,15 @@ import {
 	SidebarFooter,
 	SidebarHeader,
 } from "#/components/ui/sidebar"
+import { useActiveOrganization } from "#/routes/_public/auth/_hooks/use-active-organization"
 import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 import { useSession } from "#/routes/_public/auth/_hooks/use-session"
-import { useActiveOrganization } from "#/routes/_public/auth/_hooks/use-active-organization"
+import { LangSwitcher } from "./lang-switcher"
 import { NavDocuments } from "./nav-documents"
 import { NavMain } from "./nav-main"
 import { NavSecondary } from "./nav-secondary"
 import { NavUser } from "./nav-user"
 import { OrgSwitcher } from "./org-switcher"
-import { LangSwitcher } from "./lang-switcher"
 
 const documents = [
 	{ name: "Data Library", url: "#", icon: IconDatabase },
@@ -54,21 +54,43 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 	const navMain = orgSlug
 		? [
-				{ title: "Dashboard", url: `/${orgSlug}/dashboard`, icon: IconDashboard },
+				{
+					title: "Dashboard",
+					url: `/${orgSlug}/dashboard`,
+					icon: IconDashboard,
+				},
 				...(canListUsers
 					? [
 							{ title: "Users", url: `/${orgSlug}/users`, icon: IconUsers },
 							{ title: "Roles", url: `/${orgSlug}/roles`, icon: IconUserCog },
-							{ title: "Permissions", url: `/${orgSlug}/permissions`, icon: IconShieldCheck },
+							{
+								title: "Permissions",
+								url: `/${orgSlug}/permissions`,
+								icon: IconShieldCheck,
+							},
 						]
 					: []),
 				...(canViewActivityLog
-					? [{ title: "Activity Log", url: `/${orgSlug}/activity`, icon: IconActivity }]
+					? [
+							{
+								title: "Activity Log",
+								url: `/${orgSlug}/activity`,
+								icon: IconActivity,
+							},
+						]
 					: []),
 				...(activeOrg
 					? [
-							{ title: "Organization", url: `/${orgSlug}/org/settings`, icon: IconBuilding },
-							{ title: "Members", url: `/${orgSlug}/org/settings?tab=members`, icon: IconUsersGroup },
+							{
+								title: "Organization",
+								url: `/${orgSlug}/org/settings`,
+								icon: IconBuilding,
+							},
+							{
+								title: "Members",
+								url: `/${orgSlug}/org/settings?tab=members`,
+								icon: IconUsersGroup,
+							},
 						]
 					: []),
 			]

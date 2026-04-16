@@ -1,7 +1,5 @@
-import {
-	flexRender,
-} from "@tanstack/react-table"
 import { IconPlus } from "@tabler/icons-react"
+import { flexRender } from "@tanstack/react-table"
 
 import { Button } from "#/components/ui/button"
 import { Input } from "#/components/ui/input"
@@ -22,7 +20,7 @@ import {
 } from "#/components/ui/table"
 import { UserFormSheet } from "../user-form-sheet"
 import { useUsersDataTable } from "./hook"
-import { type UserRow } from "./schema"
+import type { UserRow } from "./schema"
 
 export type { UserRow }
 
@@ -36,10 +34,15 @@ export function UsersDataTable({ users }: { users: UserRow[] }) {
 					<Input
 						placeholder="Filter by name…"
 						value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-						onChange={(e) => table.getColumn("name")?.setFilterValue(e.target.value)}
+						onChange={(e) =>
+							table.getColumn("name")?.setFilterValue(e.target.value)
+						}
 						className="max-w-sm"
 					/>
-					<Button size="sm" onClick={() => setSheet({ open: true, mode: "create" })}>
+					<Button
+						size="sm"
+						onClick={() => setSheet({ open: true, mode: "create" })}
+					>
 						<IconPlus className="size-4" />
 						New User
 					</Button>
@@ -54,7 +57,10 @@ export function UsersDataTable({ users }: { users: UserRow[] }) {
 										<TableHead key={header.id}>
 											{header.isPlaceholder
 												? null
-												: flexRender(header.column.columnDef.header, header.getContext())}
+												: flexRender(
+														header.column.columnDef.header,
+														header.getContext(),
+													)}
 										</TableHead>
 									))}
 								</TableRow>
@@ -66,14 +72,20 @@ export function UsersDataTable({ users }: { users: UserRow[] }) {
 									<TableRow key={row.id}>
 										{row.getVisibleCells().map((cell) => (
 											<TableCell key={cell.id}>
-												{flexRender(cell.column.columnDef.cell, cell.getContext())}
+												{flexRender(
+													cell.column.columnDef.cell,
+													cell.getContext(),
+												)}
 											</TableCell>
 										))}
 									</TableRow>
 								))
 							) : (
 								<TableRow>
-									<TableCell colSpan={columns.length} className="h-24 text-center">
+									<TableCell
+										colSpan={columns.length}
+										className="h-24 text-center"
+									>
 										No users found.
 									</TableCell>
 								</TableRow>
@@ -96,14 +108,26 @@ export function UsersDataTable({ users }: { users: UserRow[] }) {
 							</SelectTrigger>
 							<SelectContent>
 								{[10, 20, 50].map((size) => (
-									<SelectItem key={size} value={String(size)}>{size} / page</SelectItem>
+									<SelectItem key={size} value={String(size)}>
+										{size} / page
+									</SelectItem>
 								))}
 							</SelectContent>
 						</Select>
-						<Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => table.previousPage()}
+							disabled={!table.getCanPreviousPage()}
+						>
 							Previous
 						</Button>
-						<Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => table.nextPage()}
+							disabled={!table.getCanNextPage()}
+						>
 							Next
 						</Button>
 					</div>
@@ -111,13 +135,27 @@ export function UsersDataTable({ users }: { users: UserRow[] }) {
 			</div>
 
 			{sheet.open && sheet.mode === "create" && (
-				<UserFormSheet mode="create" open onOpenChange={(open) => !open && setSheet({ open: false })} />
+				<UserFormSheet
+					mode="create"
+					open
+					onOpenChange={(open) => !open && setSheet({ open: false })}
+				/>
 			)}
 			{sheet.open && sheet.mode === "edit" && (
-				<UserFormSheet mode="edit" user={sheet.user} open onOpenChange={(open) => !open && setSheet({ open: false })} />
+				<UserFormSheet
+					mode="edit"
+					user={sheet.user}
+					open
+					onOpenChange={(open) => !open && setSheet({ open: false })}
+				/>
 			)}
 			{sheet.open && sheet.mode === "delete" && (
-				<UserFormSheet mode="delete" user={sheet.user} open onOpenChange={(open) => !open && setSheet({ open: false })} />
+				<UserFormSheet
+					mode="delete"
+					user={sheet.user}
+					open
+					onOpenChange={(open) => !open && setSheet({ open: false })}
+				/>
 			)}
 		</>
 	)

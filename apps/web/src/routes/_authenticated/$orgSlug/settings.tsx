@@ -1,6 +1,11 @@
-import * as React from "react"
-import { createFileRoute, Link, useParams, useSearch } from "@tanstack/react-router"
 import { IconLock, IconUser } from "@tabler/icons-react"
+import {
+	createFileRoute,
+	Link,
+	useParams,
+	useSearch,
+} from "@tanstack/react-router"
+import type * as React from "react"
 import { z } from "zod"
 import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar"
 

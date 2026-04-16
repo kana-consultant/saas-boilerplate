@@ -1,11 +1,13 @@
 import { ORPCError, os } from "@orpc/server"
-
+import type {
+	AuthedContext,
+	OptionalAuthContext,
+} from "#/application/shared/context.ts"
 import { AppError } from "#/application/shared/errors.ts"
-import type { AuthedContext, OptionalAuthContext } from "#/application/shared/context.ts"
 import type { AppRole, Resource } from "#/domain/role/permissions.ts"
 import {
-	PLATFORM_SUPER_ADMIN,
 	hasPermission,
+	PLATFORM_SUPER_ADMIN,
 } from "#/domain/role/permissions.ts"
 import type { ORPCContext } from "./context.ts"
 
@@ -15,10 +17,8 @@ export const publicProcedure = os
 		try {
 			return await options.next({ context: options.context })
 		} catch (err) {
-			if (err instanceof AppError) {
-				throw new ORPCError(err.code, { message: err.message })
-			}
-			throw err
+			if (!(err instanceof AppError)) throw err
+			throw new ORPCError(err.code, { message: err.message })
 		}
 	})
 
@@ -70,7 +70,8 @@ export const platformSuperAdminProcedure = protectedProcedure.use((options) => {
 })
 
 export function toAuthedContext(ctx: ORPCContext): AuthedContext {
-	if (!ctx.session) throw new ORPCError("UNAUTHORIZED", { message: "Not authenticated" })
+	if (!ctx.session)
+		throw new ORPCError("UNAUTHORIZED", { message: "Not authenticated" })
 	return { session: ctx.session, orgRole: ctx.orgRole, headers: ctx.headers }
 }
 

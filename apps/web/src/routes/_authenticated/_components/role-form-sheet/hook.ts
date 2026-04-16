@@ -1,5 +1,5 @@
-import * as React from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import * as React from "react"
 import { toast } from "sonner"
 import { match } from "ts-pattern"
 
@@ -12,7 +12,12 @@ import {
 	type RoleFormSheetProps,
 } from "../role-form-helpers"
 
-export function useRoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetProps) {
+export function useRoleFormSheet({
+	mode,
+	role,
+	open,
+	onOpenChange,
+}: RoleFormSheetProps) {
 	const queryClient = useQueryClient()
 
 	const invalidate = () =>

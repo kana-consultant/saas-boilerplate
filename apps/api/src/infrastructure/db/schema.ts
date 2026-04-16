@@ -138,5 +138,9 @@ export const rolePermission = pgTable(
 		resource: text("resource").notNull(),
 		action: text("action").notNull(),
 	},
-	(t) => ({ pk: primaryKey({ columns: [t.roleId, t.organizationId, t.resource, t.action] }) }),
+	(t) => ({
+		pk: primaryKey({
+			columns: [t.roleId, t.organizationId, t.resource, t.action],
+		}),
+	}),
 )

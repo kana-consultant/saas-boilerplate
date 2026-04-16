@@ -21,7 +21,8 @@ export const resourceActions = {
 
 export type Resource = keyof typeof resourceActions
 
-export type ResourceAction<R extends Resource> = (typeof resourceActions)[R][number]
+export type ResourceAction<R extends Resource> =
+	(typeof resourceActions)[R][number]
 
 const ownerPermissions = {
 	user: [
@@ -52,13 +53,20 @@ const memberPermissions = {
 	"activity-log": [],
 } satisfies Partial<Record<Resource, readonly string[]>>
 
-export const rolePermissions: Record<AppRole, Partial<Record<Resource, readonly string[]>>> = {
+export const rolePermissions: Record<
+	AppRole,
+	Partial<Record<Resource, readonly string[]>>
+> = {
 	owner: ownerPermissions,
 	admin: adminPermissions,
 	member: memberPermissions,
 }
 
-export function hasPermission(role: AppRole, resource: Resource, actions: string[]): boolean {
+export function hasPermission(
+	role: AppRole,
+	resource: Resource,
+	actions: string[],
+): boolean {
 	const allowed = rolePermissions[role]?.[resource] ?? []
 	return actions.every((a) => allowed.includes(a))
 }
@@ -69,7 +77,10 @@ export const ROLE_RANK: Record<AppRole, number> = {
 	owner: 2,
 }
 
-export function outranks(caller: AppRole | null, target: AppRole | null): boolean {
+export function outranks(
+	caller: AppRole | null,
+	target: AppRole | null,
+): boolean {
 	const c = ROLE_RANK[caller ?? "member"] ?? 0
 	const t = ROLE_RANK[target ?? "member"] ?? 0
 	return c > t

@@ -18,7 +18,10 @@ import {
 } from "#/components/ui/sheet"
 import type { AppRole } from "#/libs/auth/permissions"
 import { FieldError } from "#/libs/tanstack-form"
-import { extractErrorMessage, type UserFormSheetProps } from "../user-form-helpers"
+import {
+	extractErrorMessage,
+	type UserFormSheetProps,
+} from "../user-form-helpers"
 import { useUserFormCreate } from "./hook"
 
 export function UserFormCreate({
@@ -26,7 +29,10 @@ export function UserFormCreate({
 	open,
 	onOpenChange,
 }: Pick<UserFormSheetProps, "defaultRole" | "open" | "onOpenChange">) {
-	const { createForm, createUser, canSetRole } = useUserFormCreate({ defaultRole, onOpenChange })
+	const { createForm, createUser, canSetRole } = useUserFormCreate({
+		defaultRole,
+		onOpenChange,
+	})
 
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
@@ -131,7 +137,11 @@ export function UserFormCreate({
 					)}
 
 					<SheetFooter className="px-0">
-						<Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+						<Button
+							variant="outline"
+							type="button"
+							onClick={() => onOpenChange(false)}
+						>
 							Cancel
 						</Button>
 						<createForm.Subscribe

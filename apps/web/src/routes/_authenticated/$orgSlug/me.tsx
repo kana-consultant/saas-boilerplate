@@ -1,5 +1,5 @@
-import * as React from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import type * as React from "react"
 import { SidebarInset, SidebarProvider } from "#/components/ui/sidebar"
 
 import { useSession } from "#/routes/_public/auth/_hooks/use-session"

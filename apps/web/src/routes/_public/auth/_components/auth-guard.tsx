@@ -8,7 +8,10 @@ interface AuthGuardProps {
 	fallback?: string
 }
 
-export const AuthGuard = ({ children, fallback = "/auth/login" }: AuthGuardProps) => {
+export const AuthGuard = ({
+	children,
+	fallback = "/auth/login",
+}: AuthGuardProps) => {
 	const { data: session, isPending } = useSession()
 
 	if (isPending) return null

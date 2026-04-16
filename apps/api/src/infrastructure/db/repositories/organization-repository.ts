@@ -29,9 +29,15 @@ export function createOrganizationRepository(db: Db): OrganizationRepository {
 		async findFirstForUser(userId) {
 			return (
 				(await db
-					.select({ id: schema.organization.id, slug: schema.organization.slug })
+					.select({
+						id: schema.organization.id,
+						slug: schema.organization.slug,
+					})
 					.from(schema.organization)
-					.innerJoin(schema.member, eq(schema.member.organizationId, schema.organization.id))
+					.innerJoin(
+						schema.member,
+						eq(schema.member.organizationId, schema.organization.id),
+					)
 					.where(eq(schema.member.userId, userId))
 					.limit(1)
 					.then((r) => r[0])) ?? null

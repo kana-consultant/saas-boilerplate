@@ -16,6 +16,9 @@ export function makeGetOrgRole(deps: GetOrgRoleDeps) {
 	return (input: GetOrgRoleInput, ctx: OptionalAuthContext) =>
 		match(ctx.session)
 			.with(null, async () => null)
-			.with({ user: { role: PLATFORM_SUPER_ADMIN } }, async (): Promise<string> => "owner")
+			.with(
+				{ user: { role: PLATFORM_SUPER_ADMIN } },
+				async (): Promise<string> => "owner",
+			)
 			.otherwise((s) => deps.memberRepo.findRole(s.user.id, input.orgId))
 }

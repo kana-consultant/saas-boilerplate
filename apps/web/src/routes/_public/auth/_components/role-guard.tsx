@@ -9,7 +9,11 @@ interface RoleGuardProps {
 	fallback?: ReactNode
 }
 
-export const RoleGuard = ({ children, roles, fallback = null }: RoleGuardProps) => {
+export const RoleGuard = ({
+	children,
+	roles,
+	fallback = null,
+}: RoleGuardProps) => {
 	const { data: session } = useSession()
 
 	if (!session?.user?.role || !roles.includes(session.user.role as AppRole)) {

@@ -9,7 +9,6 @@ export interface CreateUserInput {
 	name: string
 	email: string
 	password: string
-	role?: string
 }
 
 export interface CreatedUser {
@@ -22,7 +21,11 @@ export interface AuthService {
 	listOrganizations(headers: Headers): Promise<Organization[]>
 
 	createUser(input: CreateUserInput, ctx: AdminContext): Promise<CreatedUser>
-	banUser(userId: string, reason: string | undefined, ctx: AdminContext): Promise<void>
+	banUser(
+		userId: string,
+		reason: string | undefined,
+		ctx: AdminContext,
+	): Promise<void>
 	unbanUser(userId: string, ctx: AdminContext): Promise<void>
 	updateUser(
 		userId: string,

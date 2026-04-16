@@ -19,7 +19,7 @@ import {
 import { Separator } from "#/components/ui/separator"
 import { OrgInviteForm } from "../org-invite-form"
 import { useOrgMembers } from "./hook"
-import { ROLES, type OrgRole } from "./schema"
+import { type OrgRole, ROLES } from "./schema"
 
 export function OrgMembers() {
 	const {
@@ -52,12 +52,18 @@ export function OrgMembers() {
 							{idx > 0 && <Separator />}
 							<div className="flex items-center gap-3 px-6 py-4">
 								<div className="flex-1 min-w-0">
-									<p className="truncate font-medium text-sm">{member.user.name}</p>
-									<p className="truncate text-xs text-muted-foreground">{member.user.email}</p>
+									<p className="truncate font-medium text-sm">
+										{member.user.name}
+									</p>
+									<p className="truncate text-xs text-muted-foreground">
+										{member.user.email}
+									</p>
 								</div>
 								<Select
 									value={member.role}
-									onValueChange={(v) => handleChangeRole(member.id, v as OrgRole)}
+									onValueChange={(v) =>
+										handleChangeRole(member.id, v as OrgRole)
+									}
 								>
 									<SelectTrigger className="w-28 h-8 text-xs">
 										<SelectValue />
@@ -97,8 +103,12 @@ export function OrgMembers() {
 									<div className="flex-1 min-w-0">
 										<p className="truncate text-sm">{inv.email}</p>
 									</div>
-									<Badge variant="secondary" className="capitalize text-xs">{inv.role}</Badge>
-									<Badge variant="outline" className="text-xs">{inv.status}</Badge>
+									<Badge variant="secondary" className="capitalize text-xs">
+										{inv.role}
+									</Badge>
+									<Badge variant="outline" className="text-xs">
+										{inv.status}
+									</Badge>
 									<Button
 										variant="ghost"
 										size="icon"

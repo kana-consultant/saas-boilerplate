@@ -1,9 +1,9 @@
 import type { ActivityRepository } from "#/domain/activity/activity-repository.ts"
 import type { MemberRepository } from "#/domain/member/member-repository.ts"
 import type { AuthService } from "#/domain/ports/auth-service.ts"
+import { assertNotSelf, assertOutranksTarget } from "../shared/authorization.ts"
 import type { AuthedContext } from "../shared/context.ts"
 import { requireActiveOrg } from "../shared/context.ts"
-import { assertNotSelf, assertOutranksTarget } from "../shared/authorization.ts"
 
 export interface BanUserInput {
 	userId: string
@@ -20,9 +20,16 @@ export function makeBanUser(deps: BanUserDeps) {
 	return async (input: BanUserInput, ctx: AuthedContext) => {
 		assertNotSelf(ctx.session.user.id, input.userId, "ban")
 		const activeOrgId = requireActiveOrg(ctx)
-		await assertOutranksTarget(deps.memberRepo, ctx.orgRole, input.userId, activeOrgId)
+		await assertOutranksTarget(
+			deps.memberRepo,
+			ctx.orgRole,
+			input.userId,
+			activeOrgId,
+		)
 
-		await deps.auth.banUser(input.userId, input.banReason, { headers: ctx.headers })
+		await deps.auth.banUser(input.userId, input.banReason, {
+			headers: ctx.headers,
+		})
 		await deps.activityRepo.insert({
 			userId: ctx.session.user.id,
 			organizationId: activeOrgId,

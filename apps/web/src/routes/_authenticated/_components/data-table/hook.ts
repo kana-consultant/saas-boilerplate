@@ -1,37 +1,43 @@
-import * as React from "react"
 import {
+	type DragEndEvent,
 	KeyboardSensor,
 	MouseSensor,
 	TouchSensor,
+	type UniqueIdentifier,
 	useSensor,
 	useSensors,
-	type DragEndEvent,
-	type UniqueIdentifier,
 } from "@dnd-kit/core"
 import { arrayMove } from "@dnd-kit/sortable"
 import {
+	type ColumnFiltersState,
 	getCoreRowModel,
 	getFacetedRowModel,
 	getFacetedUniqueValues,
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
-	useReactTable,
-	type ColumnFiltersState,
 	type SortingState,
+	useReactTable,
 	type VisibilityState,
 } from "@tanstack/react-table"
-import { z } from "zod"
+import * as React from "react"
+import type { z } from "zod"
 
-import { columns, schema } from "../data-table-columns"
+import { columns, type schema } from "../data-table-columns"
 
 export function useDataTable(initialData: z.infer<typeof schema>[]) {
 	const [data, setData] = React.useState(() => initialData)
 	const [rowSelection, setRowSelection] = React.useState({})
-	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+	const [columnVisibility, setColumnVisibility] =
+		React.useState<VisibilityState>({})
+	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+		[],
+	)
 	const [sorting, setSorting] = React.useState<SortingState>([])
-	const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 10 })
+	const [pagination, setPagination] = React.useState({
+		pageIndex: 0,
+		pageSize: 10,
+	})
 
 	const sortableId = React.useId()
 	const sensors = useSensors(
@@ -48,7 +54,13 @@ export function useDataTable(initialData: z.infer<typeof schema>[]) {
 	const table = useReactTable({
 		data,
 		columns,
-		state: { sorting, columnVisibility, rowSelection, columnFilters, pagination },
+		state: {
+			sorting,
+			columnVisibility,
+			rowSelection,
+			columnFilters,
+			pagination,
+		},
 		getRowId: (row) => row.id.toString(),
 		enableRowSelection: true,
 		onRowSelectionChange: setRowSelection,

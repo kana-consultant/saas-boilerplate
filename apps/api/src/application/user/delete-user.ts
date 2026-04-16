@@ -1,7 +1,7 @@
 import type { ActivityRepository } from "#/domain/activity/activity-repository.ts"
 import type { AuthService } from "#/domain/ports/auth-service.ts"
-import type { AuthedContext } from "../shared/context.ts"
 import { assertNotSelf } from "../shared/authorization.ts"
+import type { AuthedContext } from "../shared/context.ts"
 
 export interface DeleteUserInput {
 	userId: string

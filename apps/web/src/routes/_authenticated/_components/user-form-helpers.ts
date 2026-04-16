@@ -3,7 +3,10 @@ import type { AppRole } from "#/libs/auth/permissions"
 
 export { extractErrorMessage } from "#/libs/errors/extract-message"
 
-const nameSchema = z.string().min(1, "Name is required").max(100, "Name too long")
+const nameSchema = z
+	.string()
+	.min(1, "Name is required")
+	.max(100, "Name too long")
 const emailSchema = z
 	.string()
 	.min(1, "Email is required")

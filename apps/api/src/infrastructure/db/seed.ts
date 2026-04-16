@@ -1,8 +1,8 @@
+import { buildAuth } from "#/infrastructure/auth/better-auth.ts"
 import { createDb } from "./client.ts"
 import { createActivityRepository } from "./repositories/activity-repository.ts"
-import { createOrganizationRepository } from "./repositories/organization-repository.ts"
 import { createMemberRepository } from "./repositories/member-repository.ts"
-import { buildAuth } from "#/infrastructure/auth/better-auth.ts"
+import { createOrganizationRepository } from "./repositories/organization-repository.ts"
 
 async function seed() {
 	const db = createDb(process.env.DATABASE_URL!)

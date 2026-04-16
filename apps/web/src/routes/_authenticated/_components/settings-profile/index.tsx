@@ -5,9 +5,14 @@ import { Label } from "#/components/ui/label"
 import { Separator } from "#/components/ui/separator"
 import { FieldError } from "#/libs/tanstack-form"
 import { useSettingsProfile } from "./hook"
-import { type SettingsProfileProps } from "./schema"
+import type { SettingsProfileProps } from "./schema"
 
-export function SettingsProfile({ name, email, role, createdAt }: SettingsProfileProps) {
+export function SettingsProfile({
+	name,
+	email,
+	role,
+	createdAt,
+}: SettingsProfileProps) {
 	const { form, submitError } = useSettingsProfile({ name })
 
 	return (
@@ -50,8 +55,15 @@ export function SettingsProfile({ name, email, role, createdAt }: SettingsProfil
 
 					<div className="flex flex-col gap-1.5">
 						<Label>Email</Label>
-						<Input value={email} disabled autoComplete="off" placeholder="your@email.com" />
-						<p className="text-muted-foreground text-xs">Email cannot be changed here.</p>
+						<Input
+							value={email}
+							disabled
+							autoComplete="off"
+							placeholder="your@email.com"
+						/>
+						<p className="text-muted-foreground text-xs">
+							Email cannot be changed here.
+						</p>
 					</div>
 				</div>
 
@@ -76,12 +88,17 @@ export function SettingsProfile({ name, email, role, createdAt }: SettingsProfil
 				</div>
 
 				{submitError && (
-					<p className="text-destructive text-sm" role="alert">{submitError}</p>
+					<p className="text-destructive text-sm" role="alert">
+						{submitError}
+					</p>
 				)}
 
 				<div>
 					<form.Subscribe
-						selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
+						selector={(s) => ({
+							canSubmit: s.canSubmit,
+							isSubmitting: s.isSubmitting,
+						})}
 					>
 						{({ canSubmit, isSubmitting }) => (
 							<Button type="submit" disabled={!canSubmit || isSubmitting}>

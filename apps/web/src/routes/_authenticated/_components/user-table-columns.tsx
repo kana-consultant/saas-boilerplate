@@ -1,5 +1,5 @@
 import { IconDotsVertical } from "@tabler/icons-react"
-import { type ColumnDef } from "@tanstack/react-table"
+import type { ColumnDef } from "@tanstack/react-table"
 
 import { Badge } from "#/components/ui/badge"
 import { Button } from "#/components/ui/button"
@@ -95,14 +95,10 @@ export function getUserColumns({
 									>
 										Set role: member
 									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() => onSetRole(user.id, "admin")}
-									>
+									<DropdownMenuItem onClick={() => onSetRole(user.id, "admin")}>
 										Set role: admin
 									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() => onSetRole(user.id, "owner")}
-									>
+									<DropdownMenuItem onClick={() => onSetRole(user.id, "owner")}>
 										Set role: owner
 									</DropdownMenuItem>
 								</>

@@ -17,12 +17,12 @@ import {
 import { Switch } from "#/components/ui/switch"
 import { resourceActions } from "#/libs/auth/permissions"
 import {
-	ACTION_LABELS,
 	ACTION_DESCRIPTIONS,
-	RESOURCE_LABELS,
-	RESOURCE_DESCRIPTIONS,
-	BUILT_IN_VARIANTS,
+	ACTION_LABELS,
 	ALL_ROWS,
+	BUILT_IN_VARIANTS,
+	RESOURCE_DESCRIPTIONS,
+	RESOURCE_LABELS,
 } from "../permissions-constants"
 import { usePermissionsMatrix } from "./hook"
 
@@ -47,7 +47,11 @@ export function PermissionsMatrix() {
 	return (
 		<div className="flex flex-col gap-6">
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-				<Select value={selectedRoleId} onValueChange={setSelectedRoleId} disabled={isLoading}>
+				<Select
+					value={selectedRoleId}
+					onValueChange={setSelectedRoleId}
+					disabled={isLoading}
+				>
 					<SelectTrigger className="w-56">
 						<SelectValue placeholder="Pick a role…" />
 					</SelectTrigger>
@@ -55,7 +59,10 @@ export function PermissionsMatrix() {
 						{roles.map((r) => (
 							<SelectItem key={r.id} value={r.id}>
 								<div className="flex items-center gap-2">
-									<Badge variant={BUILT_IN_VARIANTS[r.id] ?? "outline"} className="text-xs">
+									<Badge
+										variant={BUILT_IN_VARIANTS[r.id] ?? "outline"}
+										className="text-xs"
+									>
 										{r.id}
 									</Badge>
 									{r.label}
@@ -71,10 +78,14 @@ export function PermissionsMatrix() {
 							{selectedRole.label}
 						</Badge>
 						{selectedRole.description && (
-							<span className="text-muted-foreground text-sm">{selectedRole.description}</span>
+							<span className="text-muted-foreground text-sm">
+								{selectedRole.description}
+							</span>
 						)}
 						<span className="text-muted-foreground ml-auto text-sm">
-							<span className="text-foreground font-semibold">{grantedCount}</span>
+							<span className="text-foreground font-semibold">
+								{grantedCount}
+							</span>
 							{" / "}
 							{ALL_ROWS.length} permissions
 						</span>
@@ -97,11 +108,20 @@ export function PermissionsMatrix() {
 					</p>
 					<div className="flex gap-2">
 						{hasPendingChanges && (
-							<Button variant="outline" size="sm" onClick={discardChanges} disabled={isSaving}>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={discardChanges}
+								disabled={isSaving}
+							>
 								Discard
 							</Button>
 						)}
-						<Button size="sm" onClick={handleSave} disabled={!hasPendingChanges || isSaving}>
+						<Button
+							size="sm"
+							onClick={handleSave}
+							disabled={!hasPendingChanges || isSaving}
+						>
 							{isSaving ? "Saving…" : "Save changes"}
 						</Button>
 					</div>
@@ -133,7 +153,9 @@ export function PermissionsMatrix() {
 											</CardDescription>
 										</div>
 										<span className="text-muted-foreground text-sm">
-											<span className="text-foreground font-semibold">{grantedInResource}</span>
+											<span className="text-foreground font-semibold">
+												{grantedInResource}
+											</span>
 											/{actions.length}
 										</span>
 									</div>
@@ -141,12 +163,19 @@ export function PermissionsMatrix() {
 								<CardContent className="flex flex-col gap-3">
 									{actions.map((action) => {
 										const granted = isGranted(resource as string, action)
-										const isPending = pendingChanges.has(`${resource}:${action}`)
+										const isPending = pendingChanges.has(
+											`${resource}:${action}`,
+										)
 
 										return (
-											<div key={action} className="flex items-center justify-between">
+											<div
+												key={action}
+												className="flex items-center justify-between"
+											>
 												<div>
-													<p className={`text-sm font-medium${isPending ? " text-primary" : ""}`}>
+													<p
+														className={`text-sm font-medium${isPending ? " text-primary" : ""}`}
+													>
 														{ACTION_LABELS[action] ?? action}
 													</p>
 													{ACTION_DESCRIPTIONS[action] && (
