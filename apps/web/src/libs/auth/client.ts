@@ -3,7 +3,9 @@ import { createAuthClient } from "better-auth/react"
 
 import { ac, roles } from "#/libs/auth/permissions"
 
-const API_BASE = import.meta.env.VITE_API_URL ?? ""
+const API_BASE =
+	import.meta.env.VITE_API_URL ||
+	(typeof window !== "undefined" ? window.location.origin : "")
 
 export const authClient = createAuthClient({
 	baseURL: `${API_BASE}/auth`,

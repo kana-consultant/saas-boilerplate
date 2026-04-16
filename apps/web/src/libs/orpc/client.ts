@@ -4,7 +4,9 @@ import { createTanstackQueryUtils } from "@orpc/tanstack-query"
 
 import type { AppRouterClient } from "@saas/api"
 
-const API_BASE = import.meta.env.VITE_API_URL ?? ""
+const API_BASE =
+	import.meta.env.VITE_API_URL ||
+	(typeof window !== "undefined" ? window.location.origin : "")
 
 const link = new RPCLink({
 	url: `${API_BASE}/rpc`,
