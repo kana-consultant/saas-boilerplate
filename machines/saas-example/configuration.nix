@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 {
   networking.hostName = "saas-example";
   system.stateVersion = "24.11";
@@ -15,10 +15,18 @@
   };
 
   services.openssh.enable = true;
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+
+  clan.core.vars.generators.saas-boilerplate = {
+    files.env.secret = true;
+    runtimeInputs = [ pkgs.openssl ];
+    script = ''
+      echo "BETTER_AUTH_SECRET=$(openssl rand -hex 32)" > "$out/env"
+    '';
+  };
 
   services.saas-boilerplate = {
     enable = true;
+    environmentFile = config.clan.core.vars.generators.saas-boilerplate.files.env.path;
     nginx = {
       enable = true;
       domain = "app.example.com";

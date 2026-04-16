@@ -37,6 +37,7 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
           pgPort = "5432";
+          redisPort = "6379";
           dbName = "tanstack_start_dev";
           dbUser = "tanstack";
           dbPass = "tanstack";
@@ -45,21 +46,25 @@
             packages = with pkgs; [
               nodejs_22
               corepack_22
+              moon
+              esbuild
               postgresql_17
+              redis
               clan-core.packages.${system}.clan-cli
+              git
+              gh
             ];
 
             DATABASE_URL = "postgresql://${dbUser}:${dbPass}@127.0.0.1:${pgPort}/${dbName}";
+            REDIS_URL = "redis://127.0.0.1:${redisPort}";
 
             shellHook = ''
-              # ── silence noisy warnings ────────────────────────────────────────
               export NIX_SHELL_PRESERVE_PROMPT=1
               export PNPM_SCRIPT_SHELL_MODE=quiet
               export NO_UPDATE_NOTIFIER=1
               export DISABLE_OPENCOLLECTIVE=1
               export ADBLOCK=1
 
-              # ── postgres env ──────────────────────────────────────────────────
               export PGPORT="${pgPort}"
               export PGDATA="$HOME/.postgres-saas"
               export PGHOST="127.0.0.1"
@@ -94,9 +99,27 @@
 
               export DATABASE_URL="postgresql://${dbUser}:${dbPass}@127.0.0.1:${pgPort}/${dbName}"
 
+              export REDISDATA="$HOME/.redis-saas"
+              mkdir -p "$REDISDATA"
+
+              if ! redis-cli -p ${redisPort} ping >/dev/null 2>&1; then
+                redis-server \
+                  --port ${redisPort} \
+                  --bind 127.0.0.1 \
+                  --daemonize yes \
+                  --dir "$REDISDATA" \
+                  --logfile "$REDISDATA/redis.log" \
+                  --pidfile "$REDISDATA/redis.pid" \
+                  >/dev/null 2>&1
+              fi
+
+              export REDIS_URL="redis://127.0.0.1:${redisPort}"
+
               _node_ver=$(node --version 2>/dev/null || echo "n/a")
               _pnpm_ver=$(pnpm --version 2>/dev/null | sed 's/^/v/' || echo "n/a")
+              _moon_ver=$(moon --version 2>/dev/null | awk '{print $NF}' | sed 's/^/v/' || echo "n/a")
               _pg_ver=$(psql --version 2>/dev/null | awk '{print $NF}' | sed 's/^/v/' || echo "n/a")
+              _redis_ver=$(redis-server --version 2>/dev/null | awk '{for(i=1;i<=NF;i++) if ($i~/^v=/) {sub("v=","v",$i); print $i}}' || echo "n/a")
               _clan_ver=$(clan --version 2>/dev/null | awk '{print $NF}' | sed 's/^/v/' || echo "n/a")
               _git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "n/a")
               _pkg_ver=$(node -p "require('./package.json').version" 2>/dev/null || echo "n/a")
@@ -115,10 +138,13 @@
               printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "Git branch"      "$_git_branch"
               printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "Node.js"         "$_node_ver"
               printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "pnpm"            "$_pnpm_ver"
+              printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "moon"            "$_moon_ver"
               printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "PostgreSQL"      "$_pg_ver"
+              printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "Redis"           "$_redis_ver"
               printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "clan-cli"        "$_clan_ver"
               printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "DB"              "${dbName}@127.0.0.1:${pgPort}"
               printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "DB status"       "✓ running"
+              printf '\033[1;34m  │\033[0m  %-18s \033[0;32m%-30s\033[1;34m │\033[0m\n' "Redis"           "127.0.0.1:${redisPort} ✓"
               printf '\033[1;34m  └──────────────────────────────────────────────────┘\033[0m\n'
 
               printf '\n\033[1;34m  ┌─ Commands ────────────────────────────────────────┐\033[0m\n'
@@ -126,6 +152,8 @@
               printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm dev:web"       "web only (port 3000)"
               printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm dev:api"       "api only (port 3001)"
               printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm build"         "production build"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm test"          "run test suites"
+              printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm check"         "biome check"
               printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm db:migrate"    "run DB migrations"
               printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm db:studio"     "open Drizzle Studio"
               printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "pnpm db:seed"       "seed the database"
@@ -134,7 +162,7 @@
               printf '\033[1;34m  │\033[0m  \033[1;37m%-20s\033[0m %-29s\033[1;34m│\033[0m\n' "clan machines update <m>" "deploy a machine"
               printf '\033[1;34m  └──────────────────────────────────────────────────┘\033[0m\n\n'
 
-              unset _node_ver _pnpm_ver _pg_ver _clan_ver _git_branch _pkg_ver
+              unset _node_ver _pnpm_ver _moon_ver _pg_ver _redis_ver _clan_ver _git_branch _pkg_ver
             '';
           };
         });
@@ -145,7 +173,7 @@
         in {
           default = pkgs.stdenv.mkDerivation (finalAttrs: {
             pname = "saas-boilerplate";
-            version = "0.5.1";
+            version = "0.5.5";
 
             src = pkgs.lib.fileset.toSource {
               root = ./.;
@@ -173,18 +201,17 @@
             buildPhase = ''
               runHook preBuild
 
-              # Web → apps/web/dist (static SPA)
               pnpm --filter @saas/web run build
 
-              # API → apps/api/dist/main.mjs (single bundle, external node_modules)
               mkdir -p apps/api/dist
               esbuild apps/api/src/main.ts \
-                --bundle \
-                --platform=node \
-                --target=node22 \
-                --format=esm \
+                --bundle --platform=node --target=node22 --format=esm \
                 --packages=external \
                 --outfile=apps/api/dist/main.mjs
+              esbuild apps/api/src/migrate.ts \
+                --bundle --platform=node --target=node22 --format=esm \
+                --packages=external \
+                --outfile=apps/api/dist/migrate.mjs
 
               runHook postBuild
             '';
@@ -195,25 +222,17 @@
               appDir="$out/lib/saas-boilerplate"
               mkdir -p "$appDir" "$out/bin"
 
-              # Self-contained production deploy for the api workspace package.
-              # `pnpm deploy --prod` produces a directory with a flat node_modules
-              # containing only @saas/api's production dependencies.
               pnpm deploy --filter=@saas/api --prod --ignore-scripts --legacy "$appDir/api"
 
-              # Replace the shipped TS source with the esbuild'd bundle so we can
-              # run plain `node main.mjs` — no tsx required at runtime.
               rm -rf "$appDir/api/src"
-              cp apps/api/dist/main.mjs "$appDir/api/main.mjs"
+              cp apps/api/dist/main.mjs    "$appDir/api/main.mjs"
+              cp apps/api/dist/migrate.mjs "$appDir/api/migrate.mjs"
 
-              # Drizzle migrations travel with the api.
               cp -r apps/api/drizzle "$appDir/api/drizzle"
 
-              # Web static assets, served by Hono via WEB_DIST_PATH.
               mkdir -p "$appDir/web"
               cp -r apps/web/dist/. "$appDir/web/"
 
-              # Entry point: run api, default WEB_DIST_PATH to shipped assets
-              # (systemd or caller can override).
               cat > "$out/bin/saas-boilerplate" <<EOF
               #!/bin/sh
               set -e
@@ -223,6 +242,14 @@
               exec ${pkgs.nodejs_22}/bin/node main.mjs "\$@"
               EOF
               chmod +x "$out/bin/saas-boilerplate"
+
+              cat > "$out/bin/saas-boilerplate-migrate" <<EOF
+              #!/bin/sh
+              set -e
+              cd "$appDir/api"
+              exec ${pkgs.nodejs_22}/bin/node migrate.mjs "\$@"
+              EOF
+              chmod +x "$out/bin/saas-boilerplate-migrate"
 
               runHook postInstall
             '';
@@ -238,6 +265,8 @@
         let
           cfg = config.services.saas-boilerplate;
           pkg = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+          userName = "saas-boilerplate";
+          dbName = "saas-boilerplate";
         in
         {
           options.services.saas-boilerplate = {
@@ -257,8 +286,11 @@
 
             databaseUrl = lib.mkOption {
               type = lib.types.str;
-              default = "postgresql://saas_boilerplate@localhost/saas_boilerplate?host=/run/postgresql";
-              description = "PostgreSQL connection URL.";
+              default = "postgresql://${userName}@localhost/${dbName}?host=/run/postgresql";
+              description = ''
+                PostgreSQL connection URL. Default uses peer-auth over the Unix
+                socket; the service's OS user and the postgres role share a name.
+              '';
             };
 
             redisUrl = lib.mkOption {
@@ -274,8 +306,7 @@
                 Path to a file containing secret env vars — at minimum
                 BETTER_AUTH_SECRET, optionally GOOGLE_CLIENT_ID and
                 GOOGLE_CLIENT_SECRET. Point this at a clan var / sops / agenix
-                secret. If null, no EnvironmentFile is applied and secrets must
-                be provided by some other means (e.g. systemd.services.*.environment).
+                secret.
               '';
             };
 
@@ -307,11 +338,18 @@
           };
 
           config = lib.mkIf cfg.enable {
+            users.users.${userName} = {
+              isSystemUser = true;
+              group = userName;
+              description = "saas-boilerplate service user";
+            };
+            users.groups.${userName} = { };
+
             services.postgresql = {
               enable = true;
-              ensureDatabases = [ "saas_boilerplate" ];
+              ensureDatabases = [ dbName ];
               ensureUsers = [{
-                name = "saas_boilerplate";
+                name = userName;
                 ensureDBOwnership = true;
               }];
             };
@@ -321,11 +359,46 @@
               port = 6380;
             };
 
+            systemd.services.saas-boilerplate-migrate = {
+              description = "SaaS Boilerplate — DB migrations";
+              wantedBy = [ "saas-boilerplate.service" ];
+              before = [ "saas-boilerplate.service" ];
+              after = [ "postgresql.service" ];
+              requires = [ "postgresql.service" ];
+
+              environment = {
+                DATABASE_URL = cfg.databaseUrl;
+                NODE_ENV = "production";
+              };
+
+              serviceConfig = {
+                Type = "oneshot";
+                RemainAfterExit = true;
+                ExecStart = "${pkg}/bin/saas-boilerplate-migrate";
+                User = userName;
+                Group = userName;
+                NoNewPrivileges = true;
+                ProtectSystem = "strict";
+                ProtectHome = true;
+                PrivateTmp = true;
+              } // lib.optionalAttrs (cfg.environmentFile != null) {
+                EnvironmentFile = cfg.environmentFile;
+              };
+            };
+
             systemd.services.saas-boilerplate = {
               description = "SaaS Boilerplate";
               wantedBy = [ "multi-user.target" ];
-              after = [ "network.target" "postgresql.service" "redis-saas-boilerplate.service" ];
-              requires = [ "postgresql.service" ];
+              after = [
+                "network.target"
+                "postgresql.service"
+                "redis-saas-boilerplate.service"
+                "saas-boilerplate-migrate.service"
+              ];
+              requires = [
+                "postgresql.service"
+                "saas-boilerplate-migrate.service"
+              ];
 
               environment = {
                 HOST = cfg.host;
@@ -346,7 +419,8 @@
 
               serviceConfig = {
                 ExecStart = lib.getExe pkg;
-                DynamicUser = true;
+                User = userName;
+                Group = userName;
                 NoNewPrivileges = true;
                 ProtectSystem = "strict";
                 ProtectHome = true;
@@ -358,6 +432,9 @@
                 EnvironmentFile = cfg.environmentFile;
               };
             };
+
+            networking.firewall.allowedTCPPorts =
+              lib.mkIf cfg.nginx.enable [ 80 443 ];
 
             services.nginx = lib.mkIf cfg.nginx.enable {
               enable = true;
