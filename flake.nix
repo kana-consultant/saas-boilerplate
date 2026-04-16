@@ -173,7 +173,7 @@
         in {
           default = pkgs.stdenv.mkDerivation (finalAttrs: {
             pname = "saas-boilerplate";
-            version = "0.5.6";
+            version = "1.0.0";
 
             src = pkgs.lib.fileset.toSource {
               root = ./.;
