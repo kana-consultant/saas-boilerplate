@@ -8,12 +8,13 @@
 	"files": {
 		"ignoreUnknown": false,
 		"includes": [
-			"**/src/**/*",
+			"**/apps/*/src/**/*",
 			"**/.vscode/**/*",
-			"**/index.html",
-			"**/vite.config.ts",
-			"!**/src/routeTree.gen.ts",
-			"!**/src/styles.css"
+			"**/apps/*/index.html",
+			"**/apps/*/vite.config.ts",
+			"!**/apps/*/src/routeTree.gen.ts",
+			"!**/apps/*/src/styles.css",
+			"!**/apps/*/src/libs/paraglide/generated/**/*"
 		]
 	},
 	"formatter": {
@@ -33,4 +34,3 @@
 		}
 	}
 }
-

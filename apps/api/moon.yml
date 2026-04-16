@@ -1,0 +1,65 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+type: 'application'
+language: 'typescript'
+stack: 'backend'
+
+tasks:
+  dev:
+    command: 'pnpm dev'
+    local: true
+    options:
+      persistent: true
+      runInCI: false
+
+  start:
+    command: 'pnpm start'
+    local: true
+    options:
+      persistent: true
+      runInCI: false
+
+  build:
+    command: 'pnpm build'
+    inputs:
+      - 'src/**/*'
+      - 'tsconfig.json'
+      - 'package.json'
+
+  test:
+    command: 'pnpm test'
+    inputs:
+      - 'src/**/*'
+      - 'tsconfig.json'
+      - 'package.json'
+
+  db-generate:
+    command: 'pnpm db:generate'
+    local: true
+    options:
+      runInCI: false
+
+  db-migrate:
+    command: 'pnpm db:migrate'
+    local: true
+    options:
+      runInCI: false
+
+  db-push:
+    command: 'pnpm db:push'
+    local: true
+    options:
+      runInCI: false
+
+  db-studio:
+    command: 'pnpm db:studio'
+    local: true
+    options:
+      runInCI: false
+      persistent: true
+
+  db-seed:
+    command: 'pnpm db:seed'
+    local: true
+    options:
+      runInCI: false

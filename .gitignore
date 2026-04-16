@@ -1,7 +1,10 @@
 node_modules
 result
 .direnv
-src/libs/paraglide/generated
+apps/web/src/libs/paraglide/generated
+apps/web/src/routeTree.gen.ts
+.moon/cache
+.moon/docker
 .DS_Store
 dist
 dist-ssr

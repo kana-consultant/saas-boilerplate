@@ -140,6 +140,7 @@ DATABASE_URL=postgresql://tanstack:tanstack@127.0.0.1:5432/tanstack_start_dev
 REDIS_URL=redis://127.0.0.1:6379
 BETTER_AUTH_URL=http://localhost:3000
 BETTER_AUTH_SECRET=$secret
+WEB_ORIGIN=http://localhost:3000
 "@
         Set-Content -Path ".env.local" -Value $envContent -Encoding UTF8
         Write-Ok ".env.local created with auto-generated BETTER_AUTH_SECRET"
@@ -181,9 +182,10 @@ BETTER_AUTH_SECRET=$secret
     Write-Host "   Redis             " -NoNewline -ForegroundColor White; Write-Host "127.0.0.1:6379 (Docker)" -ForegroundColor Green
     Write-Host ""
     Write-Host "   Commands:" -ForegroundColor White
-    Write-Host "     pnpm dev            " -NoNewline -ForegroundColor White; Write-Host "start dev server (port 3000)" -ForegroundColor DarkGray
-    Write-Host "     pnpm build          " -NoNewline -ForegroundColor White; Write-Host "production build" -ForegroundColor DarkGray
-    Write-Host "     pnpm start          " -NoNewline -ForegroundColor White; Write-Host "run production server" -ForegroundColor DarkGray
+    Write-Host "     pnpm dev            " -NoNewline -ForegroundColor White; Write-Host "start web + api via moon" -ForegroundColor DarkGray
+    Write-Host "     pnpm dev:web        " -NoNewline -ForegroundColor White; Write-Host "web only (port 3000)" -ForegroundColor DarkGray
+    Write-Host "     pnpm dev:api        " -NoNewline -ForegroundColor White; Write-Host "api only (port 3001)" -ForegroundColor DarkGray
+    Write-Host "     pnpm build          " -NoNewline -ForegroundColor White; Write-Host "production build (all apps)" -ForegroundColor DarkGray
     Write-Host "     pnpm test           " -NoNewline -ForegroundColor White; Write-Host "run test suite" -ForegroundColor DarkGray
     Write-Host "     pnpm lint           " -NoNewline -ForegroundColor White; Write-Host "lint with Biome" -ForegroundColor DarkGray
     Write-Host "     pnpm check          " -NoNewline -ForegroundColor White; Write-Host "format + lint check" -ForegroundColor DarkGray
