@@ -188,6 +188,7 @@
 
             nativeBuildInputs = [
               pkgs.nodejs_22
+              pkgs.pnpm
               pkgs.pnpmConfigHook
               pkgs.esbuild
             ];
@@ -195,7 +196,7 @@
             pnpmDeps = pkgs.pnpm.fetchDeps {
               inherit (finalAttrs) pname version src;
               fetcherVersion = 3;
-              hash = pkgs.lib.fakeHash;
+              hash = "sha256-HOGajHScf17ATQlhGd8kOu5cgXUlIVY50byJaqEF1E0=";
             };
 
             buildPhase = ''
@@ -206,11 +207,13 @@
               mkdir -p apps/api/dist
               esbuild apps/api/src/main.ts \
                 --bundle --platform=node --target=node22 --format=esm \
-                --packages=external \
+                --external:pg-native \
+                --banner:js="import { createRequire as _crq } from 'node:module'; const require = _crq(import.meta.url);" \
                 --outfile=apps/api/dist/main.mjs
               esbuild apps/api/src/migrate.ts \
                 --bundle --platform=node --target=node22 --format=esm \
-                --packages=external \
+                --external:pg-native \
+                --banner:js="import { createRequire as _crq } from 'node:module'; const require = _crq(import.meta.url);" \
                 --outfile=apps/api/dist/migrate.mjs
 
               runHook postBuild
@@ -222,9 +225,7 @@
               appDir="$out/lib/saas-boilerplate"
               mkdir -p "$appDir" "$out/bin"
 
-              pnpm deploy --filter=@saas/api --prod --ignore-scripts --legacy "$appDir/api"
-
-              rm -rf "$appDir/api/src"
+              mkdir -p "$appDir/api"
               cp apps/api/dist/main.mjs    "$appDir/api/main.mjs"
               cp apps/api/dist/migrate.mjs "$appDir/api/migrate.mjs"
 
