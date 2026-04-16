@@ -74,7 +74,7 @@ export function OrgSettingsGeneral() {
 				logo: activeOrg.logo ?? "",
 			})
 		}
-	}, [activeOrg?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+	}, [activeOrg?.id])
 
 	if (!activeOrg) return null
 

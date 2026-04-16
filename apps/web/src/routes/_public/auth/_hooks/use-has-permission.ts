@@ -10,10 +10,8 @@ export const useHasPermission = (
 	const { data: session } = authClient.useSession()
 	if (!session?.user) return false
 
-	// Platform super-admin = god mode
 	if (session.user.role === PLATFORM_SUPER_ADMIN) return true
 
-	// Get org membership role from active org
 	const { data: activeOrg } = authClient.useActiveOrganization()
 	const membership = (activeOrg as { members?: { userId: string; role: string }[] } | null)
 		?.members?.find((m) => m.userId === session.user.id)

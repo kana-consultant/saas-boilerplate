@@ -33,7 +33,6 @@ import { buildAuth } from "#/infrastructure/auth/better-auth.ts"
 import { createAuthService } from "#/infrastructure/auth/auth-service.ts"
 import { buildRouter } from "#/presentation/routers/index.ts"
 
-// ─── Composition root ──────────────────────────────────────────────────────
 const db = createDb(process.env.DATABASE_URL!)
 
 const activityRepo = createActivityRepository(db)
@@ -61,7 +60,6 @@ const useCases = buildUseCases({
 
 const router = buildRouter(useCases)
 
-// ─── HTTP server ────────────────────────────────────────────────────────────
 const app = new Hono()
 
 const WEB_ORIGIN = process.env.WEB_ORIGIN ?? "http://localhost:3000"

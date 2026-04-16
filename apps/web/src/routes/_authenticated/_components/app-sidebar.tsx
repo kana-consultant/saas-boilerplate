@@ -43,7 +43,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const canListUsers = useHasPermission("user", ["list"])
 	const canViewActivityLog = useHasPermission("activity-log", ["list"])
 	const { data: activeOrg } = useActiveOrganization()
-	// orgSlug may not be in params if we're on a non-$orgSlug route
 	const params = useParams({ strict: false })
 	const orgSlug = (params as { orgSlug?: string }).orgSlug ?? ""
 

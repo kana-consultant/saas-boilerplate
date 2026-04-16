@@ -50,7 +50,6 @@ export const user = pgTable("user", {
 	image: text("image"),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").notNull().defaultNow(),
-	// admin plugin fields
 	role: text("role").notNull().default("user"),
 	banned: boolean("banned").notNull().default(false),
 	banReason: text("ban_reason"),
@@ -68,9 +67,7 @@ export const session = pgTable("session", {
 	userId: text("user_id")
 		.notNull()
 		.references(() => user.id, { onDelete: "cascade" }),
-	// admin plugin field
 	impersonatedBy: text("impersonated_by"),
-	// organization plugin field
 	activeOrganizationId: text("active_organization_id"),
 })
 

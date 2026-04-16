@@ -1,9 +1,3 @@
-# Dev-only infrastructure for Windows (and any OS without Nix).
-# Usage:  docker compose -f docker-compose.dev.yml up -d
-#
-# Provides the same PostgreSQL + Redis that devenv.nix provisions on Mac/Linux.
-# Run Node.js natively on the host for full HMR speed.
-
 services:
   postgres:
     image: postgres:16-alpine

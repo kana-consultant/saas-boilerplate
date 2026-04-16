@@ -84,7 +84,7 @@ export function useRoleFormSheet({ mode, role, open, onOpenChange }: RoleFormShe
 				description: role?.description ?? "",
 			})
 		}
-	}, [open, role?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+	}, [open, role?.id])
 
 	return { form, mutation }
 }

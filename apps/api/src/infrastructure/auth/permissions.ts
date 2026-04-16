@@ -25,14 +25,12 @@ export const ownerRole = buildRole("owner")
 export const adminRole = buildRole("admin")
 export const memberRole = buildRole("member")
 
-// Org-level roles — passed to better-auth organization plugin for UI surfaces
 export const roles = {
 	owner: ownerRole,
 	admin: adminRole,
 	member: memberRole,
 } as const
 
-// Platform roles — admin plugin uses these for user.role column values
 export const platformRoles = {
 	"super-admin": ownerRole,
 	admin: adminRole,

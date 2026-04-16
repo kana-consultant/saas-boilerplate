@@ -60,7 +60,7 @@ export function useUserFormSheet({
 		if (mode === "edit" && user) {
 			editForm.reset({ name: user.name, email: user.email })
 		}
-	}, [user?.id, mode]) // eslint-disable-line react-hooks/exhaustive-deps
+	}, [user?.id, mode])
 
 	return { editForm, updateUser, deleteUser }
 }

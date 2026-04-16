@@ -1,7 +1,5 @@
 import { z } from "zod"
 
-// ─── Shared field definitions ───────────────────────────────────────────────
-
 const userId = z.string().min(1, "User ID is required")
 const userName = z.string().min(1, "Name is required").max(100, "Name too long").trim()
 const userEmail = z
@@ -15,8 +13,6 @@ const userPassword = z
 	.min(8, "Password must be at least 8 characters")
 	.max(72, "Password too long")
 const userRole = z.enum(["member", "admin", "owner"])
-
-// ─── User schemas ───────────────────────────────────────────────────────────
 
 export const banUserSchema = z.object({
 	userId,
@@ -48,8 +44,6 @@ export const updateUserSchema = z
 	})
 
 export const deleteUserSchema = z.object({ userId })
-
-// ─── Role schemas ───────────────────────────────────────────────────────────
 
 const roleSlug = z
 	.string()
@@ -85,8 +79,6 @@ export const setRolePermissionSchema = z.object({
 	granted: z.boolean(),
 })
 
-// ─── Activity log schemas ───────────────────────────────────────────────────
-
 export const listActivityLogsSchema = z.object({
 	limit: z.number().int().min(1).max(200).default(50),
 	offset: z.number().int().min(0).default(0),
@@ -94,8 +86,6 @@ export const listActivityLogsSchema = z.object({
 	resource: z.string().optional(),
 	action: z.string().optional(),
 })
-
-// ─── Auth schemas ───────────────────────────────────────────────────────────
 
 export const getOrgRoleSchema = z.object({ orgId: z.string() })
 export const getOrgContextSchema = z.object({ orgSlug: z.string() })

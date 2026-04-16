@@ -9,7 +9,6 @@ import {
 } from "#/domain/role/permissions.ts"
 import type { ORPCContext } from "./context.ts"
 
-// Base builder — all procedures share this context type.
 export const publicProcedure = os
 	.$context<ORPCContext>()
 	.use(async (options) => {
@@ -23,7 +22,6 @@ export const publicProcedure = os
 		}
 	})
 
-// Requires an authenticated session.
 export const protectedProcedure = publicProcedure.use((options) => {
 	if (!options.context.session) {
 		throw new ORPCError("UNAUTHORIZED", { message: "You must be signed in" })
@@ -71,7 +69,6 @@ export const platformSuperAdminProcedure = protectedProcedure.use((options) => {
 	return options.next({ context: options.context })
 })
 
-// Helpers to translate oRPC procedure context into application-layer contexts.
 export function toAuthedContext(ctx: ORPCContext): AuthedContext {
 	if (!ctx.session) throw new ORPCError("UNAUTHORIZED", { message: "Not authenticated" })
 	return { session: ctx.session, orgRole: ctx.orgRole, headers: ctx.headers }
