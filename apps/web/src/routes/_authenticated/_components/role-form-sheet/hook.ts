@@ -1,6 +1,7 @@
 import * as React from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { match } from "ts-pattern"
 
 import { orpc } from "#/libs/orpc/client"
 import { useForm } from "#/libs/tanstack-form"
@@ -37,7 +38,10 @@ export function useRoleFormSheet({ mode, role, open, onOpenChange }: RoleFormShe
 		onError: (err) => toast.error(extractErrorMessage(err)),
 	})
 
-	const mutation = mode === "create" ? createRole : updateRole
+	const mutation = match(mode)
+		.with("create", () => createRole)
+		.with("edit", () => updateRole)
+		.exhaustive()
 
 	const form = useForm({
 		defaultValues: {
@@ -46,23 +50,30 @@ export function useRoleFormSheet({ mode, role, open, onOpenChange }: RoleFormShe
 			description: role?.description ?? "",
 		},
 		validators: {
-			onChange: mode === "create" ? createRoleSchema : editRoleSchema,
+			onChange: match(mode)
+				.with("create", () => createRoleSchema)
+				.with("edit", () => editRoleSchema)
+				.exhaustive(),
 		},
-		onSubmit: async ({ value }) => {
-			if (mode === "create") {
-				await createRole.mutateAsync({
-					id: value.id.trim(),
-					label: value.label.trim(),
-					description: value.description.trim(),
-				})
-			} else if (role) {
-				await updateRole.mutateAsync({
-					id: role.id,
-					label: value.label.trim(),
-					description: value.description.trim(),
-				})
-			}
-		},
+		onSubmit: async ({ value }) =>
+			match(mode)
+				.with("create", () =>
+					createRole.mutateAsync({
+						id: value.id.trim(),
+						label: value.label.trim(),
+						description: value.description.trim(),
+					}),
+				)
+				.with("edit", () =>
+					role
+						? updateRole.mutateAsync({
+								id: role.id,
+								label: value.label.trim(),
+								description: value.description.trim(),
+							})
+						: Promise.resolve(),
+				)
+				.exhaustive(),
 	})
 
 	React.useEffect(() => {

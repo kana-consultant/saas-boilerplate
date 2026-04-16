@@ -1,3 +1,5 @@
+import { match } from "ts-pattern"
+
 import { Badge } from "#/components/ui/badge"
 import { Button } from "#/components/ui/button"
 import { Input } from "#/components/ui/input"
@@ -24,8 +26,8 @@ export function UserFormSheet({
 }: UserFormSheetProps) {
 	const { editForm, updateUser, deleteUser } = useUserFormSheet({ mode, user, onOpenChange })
 
-	if (mode === "delete") {
-		return (
+	return match(mode)
+		.with("delete", () => (
 			<Sheet open={open} onOpenChange={onOpenChange}>
 				<SheetContent side="right">
 					<SheetHeader>
@@ -56,11 +58,8 @@ export function UserFormSheet({
 					</SheetFooter>
 				</SheetContent>
 			</Sheet>
-		)
-	}
-
-	if (mode === "edit") {
-		return (
+		))
+		.with("edit", () => (
 			<Sheet open={open} onOpenChange={onOpenChange}>
 				<SheetContent side="right">
 					<SheetHeader>
@@ -145,10 +144,9 @@ export function UserFormSheet({
 					</form>
 				</SheetContent>
 			</Sheet>
-		)
-	}
-
-	return (
-		<UserFormCreate defaultRole={defaultRole} open={open} onOpenChange={onOpenChange} />
-	)
+		))
+		.with("create", () => (
+			<UserFormCreate defaultRole={defaultRole} open={open} onOpenChange={onOpenChange} />
+		))
+		.exhaustive()
 }

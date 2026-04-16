@@ -1,3 +1,5 @@
+import { match } from "ts-pattern"
+
 import { Button } from "#/components/ui/button"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
@@ -21,11 +23,17 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetContent side="right">
 				<SheetHeader>
-					<SheetTitle>{mode === "create" ? "New Role" : "Edit Role"}</SheetTitle>
+					<SheetTitle>
+						{match(mode)
+							.with("create", () => "New Role")
+							.with("edit", () => "Edit Role")
+							.exhaustive()}
+					</SheetTitle>
 					<SheetDescription>
-						{mode === "create"
-							? "Create a new application role."
-							: "Update the role's label and description."}
+						{match(mode)
+							.with("create", () => "Create a new application role.")
+							.with("edit", () => "Update the role's label and description.")
+							.exhaustive()}
 					</SheetDescription>
 				</SheetHeader>
 				<form
@@ -113,9 +121,12 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 						>
 							{({ canSubmit, isSubmitting }) => (
 								<Button type="submit" disabled={!canSubmit || isSubmitting}>
-									{isSubmitting
-										? mode === "create" ? "Creating…" : "Saving…"
-										: mode === "create" ? "Create" : "Save"}
+									{match({ mode, isSubmitting })
+										.with({ mode: "create", isSubmitting: true }, () => "Creating…")
+										.with({ mode: "create", isSubmitting: false }, () => "Create")
+										.with({ mode: "edit", isSubmitting: true }, () => "Saving…")
+										.with({ mode: "edit", isSubmitting: false }, () => "Save")
+										.exhaustive()}
 								</Button>
 							)}
 						</form.Subscribe>

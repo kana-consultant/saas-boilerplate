@@ -13,10 +13,12 @@ import { OpenAPIHandler } from "@orpc/openapi/fetch"
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4"
 import { SmartCoercionPlugin } from "@orpc/json-schema"
 import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins"
+import { P, match } from "ts-pattern"
 
 import { buildUseCases } from "#/application/use-cases.ts"
 import type { AppRole } from "#/domain/role/permissions.ts"
 import { PLATFORM_SUPER_ADMIN } from "#/domain/role/permissions.ts"
+import type { Session } from "#/domain/session/session.ts"
 import { createDb } from "#/infrastructure/db/client.ts"
 import { createActivityRepository } from "#/infrastructure/db/repositories/activity-repository.ts"
 import { createMemberRepository } from "#/infrastructure/db/repositories/member-repository.ts"
@@ -76,19 +78,20 @@ app.use(
 
 app.on(["GET", "POST"], "/auth/*", (c) => auth.handler(c.req.raw))
 
+const resolveOrgRole = (session: Session | null): Promise<AppRole | null> =>
+	match(session)
+		.with(null, async () => null)
+		.with({ user: { role: PLATFORM_SUPER_ADMIN } }, async (): Promise<AppRole> => "owner")
+		.with(
+			{ session: { activeOrganizationId: P.string } },
+			async (s) =>
+				(await memberRepo.findRole(s.user.id, s.session.activeOrganizationId)) as AppRole | null,
+		)
+		.otherwise(async () => null)
+
 const buildContext = async (headers: Headers) => {
 	const session = await auth.getSession(headers)
-	let orgRole: AppRole | null = null
-	if (session?.user) {
-		if (session.user.role === PLATFORM_SUPER_ADMIN) {
-			orgRole = "owner"
-		} else if (session.session?.activeOrganizationId) {
-			orgRole = (await memberRepo.findRole(
-				session.user.id,
-				session.session.activeOrganizationId,
-			)) as AppRole | null
-		}
-	}
+	const orgRole = await resolveOrgRole(session)
 	return { headers, session, orgRole, useCases }
 }
 

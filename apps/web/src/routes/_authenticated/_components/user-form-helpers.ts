@@ -1,6 +1,8 @@
 import { z } from "zod"
 import type { AppRole } from "#/libs/auth/permissions"
 
+export { extractErrorMessage } from "#/libs/errors/extract-message"
+
 const nameSchema = z.string().min(1, "Name is required").max(100, "Name too long")
 const emailSchema = z
 	.string()
@@ -24,12 +26,6 @@ export const createUserSchema = z.object({
 	password: passwordSchema,
 	role: roleSchema,
 })
-
-export function extractErrorMessage(error: unknown): string {
-	if (error instanceof Error) return error.message
-	if (typeof error === "string") return error
-	return "An unexpected error occurred"
-}
 
 export interface UserFormSheetProps {
 	mode: "create" | "edit" | "delete"

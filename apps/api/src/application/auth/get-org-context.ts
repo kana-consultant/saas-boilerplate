@@ -1,3 +1,5 @@
+import { match } from "ts-pattern"
+
 import type { MemberRepository } from "#/domain/member/member-repository.ts"
 import type { OrganizationRepository } from "#/domain/organization/organization-repository.ts"
 import type { Cache } from "#/domain/ports/cache.ts"
@@ -31,40 +33,43 @@ export function makeGetOrgContext(deps: GetOrgContextDeps) {
 		ctx: OptionalAuthContext,
 	): Promise<OrgContextResult | null> => {
 		const cacheKey = `org:slug:${input.orgSlug}`
-		const [, org] = await Promise.all([
-			Promise.resolve(ctx.session),
-			(async () => {
-				const cached = await deps.cache.get<Organization>(cacheKey)
-				if (cached) return cached
-				const row = await deps.orgRepo.findBySlug(input.orgSlug)
-				if (row) await deps.cache.set(cacheKey, row, ORG_TTL)
-				return row
-			})(),
-		])
+		const org = await (async () => {
+			const cached = await deps.cache.get<Organization>(cacheKey)
+			if (cached) return cached
+			const row = await deps.orgRepo.findBySlug(input.orgSlug)
+			if (row) await deps.cache.set(cacheKey, row, ORG_TTL)
+			return row
+		})()
 
-		if (!ctx.session?.user) return null
-
-		if (!org) {
-			const firstOrg = await deps.orgRepo.findFirstForUser(ctx.session.user.id)
-			return {
-				org: null,
-				orgRole: null,
-				redirectSlug: firstOrg?.slug ?? firstOrg?.id ?? null,
-			}
-		}
-
-		if (ctx.session.user.role === PLATFORM_SUPER_ADMIN) {
-			return { org, orgRole: "owner", redirectSlug: null }
-		}
-
-		const roleKey = `member:role:${ctx.session.user.id}:${org.id}`
-		const cachedRole = await deps.cache.get<AppRole>(roleKey)
-		let orgRole: AppRole | null = cachedRole
-		if (!cachedRole) {
-			orgRole = await deps.memberRepo.findRole(ctx.session.user.id, org.id)
-			if (orgRole) await deps.cache.set(roleKey, orgRole, ROLE_TTL)
-		}
-
-		return { org, orgRole, redirectSlug: null }
+		return match({ session: ctx.session, org })
+			.with({ session: null }, async () => null)
+			.with({ org: null }, async ({ session }) => {
+				const firstOrg = await deps.orgRepo.findFirstForUser(session.user.id)
+				return {
+					org: null,
+					orgRole: null,
+					redirectSlug: firstOrg?.slug ?? firstOrg?.id ?? null,
+				}
+			})
+			.with(
+				{ session: { user: { role: PLATFORM_SUPER_ADMIN } } },
+				async ({ org: matchedOrg }) => ({
+					org: matchedOrg,
+					orgRole: "owner" as const,
+					redirectSlug: null,
+				}),
+			)
+			.otherwise(async ({ session, org: matchedOrg }) => {
+				const roleKey = `member:role:${session.user.id}:${matchedOrg.id}`
+				const cachedRole = await deps.cache.get<AppRole>(roleKey)
+				const orgRole =
+					cachedRole ??
+					(await (async () => {
+						const r = await deps.memberRepo.findRole(session.user.id, matchedOrg.id)
+						if (r) await deps.cache.set(roleKey, r, ROLE_TTL)
+						return r
+					})())
+				return { org: matchedOrg, orgRole, redirectSlug: null }
+			})
 	}
 }
