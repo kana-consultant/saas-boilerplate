@@ -16,7 +16,6 @@ export interface BuildAuthDeps {
 
 export function buildAuth({ db, activityRepo }: BuildAuthDeps) {
 	return betterAuth({
-		basePath: "/auth",
 		database: drizzleAdapter(db, { provider: "pg" }),
 		emailAndPassword: {
 			enabled: true,

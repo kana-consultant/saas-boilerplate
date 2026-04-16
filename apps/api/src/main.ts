@@ -78,7 +78,7 @@ app.use(
 
 app.get("/healthz", (c) => c.text("ok"))
 
-app.on(["GET", "POST"], "/auth/*", (c) => auth.handler(c.req.raw))
+app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw))
 
 const resolveOrgRole = (session: Session | null): Promise<AppRole | null> =>
 	match(session)

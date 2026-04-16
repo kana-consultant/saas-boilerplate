@@ -39,10 +39,6 @@ export default defineConfig({
 				target: API_URL,
 				changeOrigin: true,
 			},
-			"/auth": {
-				target: API_URL,
-				changeOrigin: true,
-			},
 		},
 	},
 	build: {

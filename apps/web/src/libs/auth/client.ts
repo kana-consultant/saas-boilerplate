@@ -8,7 +8,7 @@ const API_BASE =
 	(typeof window !== "undefined" ? window.location.origin : "")
 
 export const authClient = createAuthClient({
-	baseURL: `${API_BASE}/auth`,
+	baseURL: `${API_BASE}/api/auth`,
 	fetchOptions: {
 		credentials: "include",
 	},
