@@ -3,6 +3,8 @@
   networking.hostName = "saas-example";
   system.stateVersion = "24.11";
 
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
   clan.core.networking.targetHost = lib.mkDefault "root@saas.example.com";
 
   boot.loader.grub.enable = lib.mkDefault true;
