@@ -4,5 +4,5 @@ projects:
   - 'apps/*'
 
 vcs:
-  manager: 'git'
+  client: 'git'
   defaultBranch: 'develop'

@@ -1,6 +1,6 @@
 $schema: 'https://moonrepo.dev/schemas/project.json'
 
-type: 'application'
+layer: 'application'
 language: 'typescript'
 stack: 'frontend'
 
@@ -10,7 +10,6 @@ dependsOn:
 tasks:
   dev:
     command: 'pnpm dev'
-    local: true
     options:
       persistent: true
       runInCI: false
@@ -29,7 +28,6 @@ tasks:
 
   preview:
     command: 'pnpm preview'
-    local: true
     options:
       persistent: true
       runInCI: false
@@ -43,7 +41,6 @@ tasks:
 
   storybook:
     command: 'pnpm storybook'
-    local: true
     options:
       persistent: true
       runInCI: false
