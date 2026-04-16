@@ -2,10 +2,11 @@ import { authClient } from "#/libs/auth/client"
 import { Button } from "#/components/ui/button"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
+import { FieldError } from "#/libs/tanstack-form"
 import { useRegisterForm } from "./hook"
 
 export const RegisterForm = () => {
-	const { form, formError, validate } = useRegisterForm()
+	const { form, formError } = useRegisterForm()
 
 	return (
 		<div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
@@ -43,13 +44,13 @@ export const RegisterForm = () => {
 			</div>
 
 			<form
-				onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }}
+				onSubmit={(e) => {
+					e.preventDefault()
+					form.handleSubmit()
+				}}
 				className="space-y-4"
 			>
-				<form.Field
-					name="name"
-					validators={{ onChange: ({ value }) => validate("name", value) }}
-				>
+				<form.Field name="name">
 					{(field) => (
 						<div className="space-y-2">
 							<Label htmlFor="name">Name</Label>
@@ -62,17 +63,12 @@ export const RegisterForm = () => {
 								onBlur={field.handleBlur}
 								autoComplete="name"
 							/>
-							{field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
-								<p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
-							)}
+							<FieldError field={field} />
 						</div>
 					)}
 				</form.Field>
 
-				<form.Field
-					name="email"
-					validators={{ onChange: ({ value }) => validate("email", value) }}
-				>
+				<form.Field name="email">
 					{(field) => (
 						<div className="space-y-2">
 							<Label htmlFor="email">Email</Label>
@@ -85,17 +81,12 @@ export const RegisterForm = () => {
 								onBlur={field.handleBlur}
 								autoComplete="email"
 							/>
-							{field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
-								<p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
-							)}
+							<FieldError field={field} />
 						</div>
 					)}
 				</form.Field>
 
-				<form.Field
-					name="password"
-					validators={{ onChange: ({ value }) => validate("password", value) }}
-				>
+				<form.Field name="password">
 					{(field) => (
 						<div className="space-y-2">
 							<Label htmlFor="password">Password</Label>
@@ -108,9 +99,7 @@ export const RegisterForm = () => {
 								onBlur={field.handleBlur}
 								autoComplete="new-password"
 							/>
-							{field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
-								<p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
-							)}
+							<FieldError field={field} />
 						</div>
 					)}
 				</form.Field>
@@ -118,10 +107,13 @@ export const RegisterForm = () => {
 				{formError && <p className="text-sm text-destructive">{formError}</p>}
 
 				<form.Subscribe
-					selector={(s) => ({ isSubmitting: s.isSubmitting, name: s.values.name, email: s.values.email, password: s.values.password })}
+					selector={(s) => ({
+						canSubmit: s.canSubmit,
+						isSubmitting: s.isSubmitting,
+					})}
 				>
-					{({ isSubmitting, name, email, password }) => (
-						<Button type="submit" className="w-full" disabled={!name || !email || !password || isSubmitting}>
+					{({ canSubmit, isSubmitting }) => (
+						<Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
 							{isSubmitting ? "Creating account…" : "Create account"}
 						</Button>
 					)}

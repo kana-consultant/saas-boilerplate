@@ -10,13 +10,8 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "#/components/ui/sheet"
-import {
-	nameSchema,
-	emailSchema,
-	fieldError,
-	extractErrorMessage,
-	type UserFormSheetProps,
-} from "../user-form-helpers"
+import { FieldError } from "#/libs/tanstack-form"
+import { extractErrorMessage, type UserFormSheetProps } from "../user-form-helpers"
 import { UserFormCreate } from "../user-form-create"
 import { useUserFormSheet } from "./hook"
 
@@ -74,15 +69,12 @@ export function UserFormSheet({
 					</SheetHeader>
 					<form
 						className="flex flex-col gap-4 px-4 py-4"
-						onSubmit={(e) => { e.preventDefault(); editForm.handleSubmit() }}
+						onSubmit={(e) => {
+							e.preventDefault()
+							editForm.handleSubmit()
+						}}
 					>
-						<editForm.Field
-							name="name"
-							validators={{
-								onChange: ({ value }) => fieldError(nameSchema, value),
-								onBlur: ({ value }) => fieldError(nameSchema, value),
-							}}
-						>
+						<editForm.Field name="name">
 							{(field) => (
 								<div className="flex flex-col gap-1.5">
 									<Label htmlFor="edit-name">Name</Label>
@@ -96,22 +88,12 @@ export function UserFormSheet({
 										onBlur={field.handleBlur}
 										aria-invalid={field.state.meta.errors.length > 0}
 									/>
-									{field.state.meta.errors[0] && (
-										<p className="text-destructive text-sm" role="alert">
-											{field.state.meta.errors[0]}
-										</p>
-									)}
+									<FieldError field={field} />
 								</div>
 							)}
 						</editForm.Field>
 
-						<editForm.Field
-							name="email"
-							validators={{
-								onChange: ({ value }) => fieldError(emailSchema, value),
-								onBlur: ({ value }) => fieldError(emailSchema, value),
-							}}
-						>
+						<editForm.Field name="email">
 							{(field) => (
 								<div className="flex flex-col gap-1.5">
 									<Label htmlFor="edit-email">Email</Label>
@@ -126,11 +108,7 @@ export function UserFormSheet({
 										onBlur={field.handleBlur}
 										aria-invalid={field.state.meta.errors.length > 0}
 									/>
-									{field.state.meta.errors[0] && (
-										<p className="text-destructive text-sm" role="alert">
-											{field.state.meta.errors[0]}
-										</p>
-									)}
+									<FieldError field={field} />
 								</div>
 							)}
 						</editForm.Field>
@@ -155,15 +133,10 @@ export function UserFormSheet({
 								selector={(s) => ({
 									canSubmit: s.canSubmit,
 									isSubmitting: s.isSubmitting,
-									name: s.values.name,
-									email: s.values.email,
 								})}
 							>
-								{({ canSubmit, isSubmitting, name, email }) => (
-									<Button
-										type="submit"
-										disabled={!canSubmit || isSubmitting || !name.trim() || !email.trim()}
-									>
+								{({ canSubmit, isSubmitting }) => (
+									<Button type="submit" disabled={!canSubmit || isSubmitting}>
 										{isSubmitting ? "Saving…" : "Save"}
 									</Button>
 								)}

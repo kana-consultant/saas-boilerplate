@@ -1,14 +1,26 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { IconTrash } from "@tabler/icons-react"
 import { useNavigate } from "@tanstack/react-router"
 import { toast } from "sonner"
+import { z } from "zod"
 
 import { Button } from "#/components/ui/button"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
 import { Separator } from "#/components/ui/separator"
 import { authClient } from "#/libs/auth/client"
+import { FieldError, useForm } from "#/libs/tanstack-form"
 import { useActiveOrganization } from "#/routes/_public/auth/_hooks/use-active-organization"
+
+const orgSettingsSchema = z.object({
+	name: z.string().min(1, "Name is required").max(100, "Name too long"),
+	slug: z
+		.string()
+		.min(1, "Slug is required")
+		.max(50, "Slug too long")
+		.regex(/^[a-z0-9-]+$/, "Lowercase letters, numbers, and hyphens only"),
+	logo: z.union([z.literal(""), z.string().url("Invalid URL")]),
+})
 
 function slugify(value: string) {
 	return value
@@ -23,33 +35,48 @@ export function OrgSettingsGeneral() {
 	const navigate = useNavigate()
 	const { data: activeOrg } = useActiveOrganization()
 
-	const [name, setName] = useState(activeOrg?.name ?? "")
-	const [slug, setSlug] = useState(activeOrg?.slug ?? "")
-	const [logo, setLogo] = useState(activeOrg?.logo ?? "")
-	const [saving, setSaving] = useState(false)
+	const [submitError, setSubmitError] = useState<string | null>(null)
 	const [deleting, setDeleting] = useState(false)
-	const [error, setError] = useState<string | null>(null)
+
+	const form = useForm({
+		defaultValues: {
+			name: activeOrg?.name ?? "",
+			slug: activeOrg?.slug ?? "",
+			logo: activeOrg?.logo ?? "",
+		},
+		validators: { onChange: orgSettingsSchema },
+		onSubmit: async ({ value }) => {
+			if (!activeOrg) return
+			setSubmitError(null)
+			const { error } = await authClient.organization.update({
+				organizationId: activeOrg.id,
+				data: {
+					name: value.name,
+					slug: value.slug,
+					logo: value.logo || undefined,
+				},
+			})
+			if (error) {
+				const msg = error.message ?? "Failed to update organization"
+				setSubmitError(msg)
+				toast.error(msg)
+			} else {
+				toast.success("Organization updated")
+			}
+		},
+	})
+
+	useEffect(() => {
+		if (activeOrg) {
+			form.reset({
+				name: activeOrg.name,
+				slug: activeOrg.slug ?? "",
+				logo: activeOrg.logo ?? "",
+			})
+		}
+	}, [activeOrg?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
 	if (!activeOrg) return null
-
-	const handleSave = async (e: React.FormEvent) => {
-		e.preventDefault()
-		setSaving(true)
-		setError(null)
-
-		const { error: err } = await authClient.organization.update({
-			organizationId: activeOrg.id,
-			data: { name, slug, logo: logo || undefined },
-		})
-
-		if (err) {
-			setError(err.message ?? "Failed to update organization")
-			toast.error(err.message ?? "Failed to update organization")
-		} else {
-			toast.success("Organization updated")
-		}
-		setSaving(false)
-	}
 
 	const handleDelete = async () => {
 		if (
@@ -60,13 +87,14 @@ export function OrgSettingsGeneral() {
 			return
 
 		setDeleting(true)
-		const { error: err } = await authClient.organization.delete({
+		const { error } = await authClient.organization.delete({
 			organizationId: activeOrg.id,
 		})
 
-		if (err) {
-			setError(err.message ?? "Failed to delete organization")
-			toast.error(err.message ?? "Failed to delete organization")
+		if (error) {
+			const msg = error.message ?? "Failed to delete organization"
+			setSubmitError(msg)
+			toast.error(msg)
 			setDeleting(false)
 		} else {
 			toast.success("Organization deleted")
@@ -76,39 +104,74 @@ export function OrgSettingsGeneral() {
 
 	return (
 		<div className="space-y-8">
-			<form onSubmit={handleSave} className="space-y-4">
-				<div className="space-y-2">
-					<Label htmlFor="org-name">Organization name</Label>
-					<Input
-						id="org-name"
-						value={name}
-						onChange={(e) => setName(e.target.value)}
-						required
-					/>
-				</div>
-				<div className="space-y-2">
-					<Label htmlFor="org-slug">Slug</Label>
-					<Input
-						id="org-slug"
-						value={slug}
-						onChange={(e) => setSlug(slugify(e.target.value))}
-						required
-					/>
-				</div>
-				<div className="space-y-2">
-					<Label htmlFor="org-logo">Logo URL</Label>
-					<Input
-						id="org-logo"
-						type="url"
-						placeholder="https://..."
-						value={logo}
-						onChange={(e) => setLogo(e.target.value)}
-					/>
-				</div>
-				{error && <p className="text-sm text-destructive">{error}</p>}
-				<Button type="submit" disabled={saving}>
-					{saving ? "Saving..." : "Save changes"}
-				</Button>
+			<form
+				onSubmit={(e) => {
+					e.preventDefault()
+					form.handleSubmit()
+				}}
+				className="space-y-4"
+			>
+				<form.Field name="name">
+					{(field) => (
+						<div className="space-y-2">
+							<Label htmlFor="org-name">Organization name</Label>
+							<Input
+								id="org-name"
+								value={field.state.value}
+								onChange={(e) => field.handleChange(e.target.value)}
+								onBlur={field.handleBlur}
+								aria-invalid={field.state.meta.errors.length > 0}
+							/>
+							<FieldError field={field} />
+						</div>
+					)}
+				</form.Field>
+
+				<form.Field name="slug">
+					{(field) => (
+						<div className="space-y-2">
+							<Label htmlFor="org-slug">Slug</Label>
+							<Input
+								id="org-slug"
+								value={field.state.value}
+								onChange={(e) => field.handleChange(slugify(e.target.value))}
+								onBlur={field.handleBlur}
+								aria-invalid={field.state.meta.errors.length > 0}
+							/>
+							<FieldError field={field} />
+						</div>
+					)}
+				</form.Field>
+
+				<form.Field name="logo">
+					{(field) => (
+						<div className="space-y-2">
+							<Label htmlFor="org-logo">Logo URL</Label>
+							<Input
+								id="org-logo"
+								type="url"
+								placeholder="https://..."
+								value={field.state.value}
+								onChange={(e) => field.handleChange(e.target.value)}
+								onBlur={field.handleBlur}
+								aria-invalid={field.state.meta.errors.length > 0}
+							/>
+							<FieldError field={field} />
+						</div>
+					)}
+				</form.Field>
+
+				{submitError && <p className="text-sm text-destructive">{submitError}</p>}
+
+				<form.Subscribe
+					selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
+				>
+					{({ canSubmit, isSubmitting }) => (
+						<Button type="submit" disabled={!canSubmit || isSubmitting}>
+							{isSubmitting ? "Saving..." : "Save changes"}
+						</Button>
+					)}
+				</form.Subscribe>
 			</form>
 
 			<Separator />

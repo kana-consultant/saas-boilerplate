@@ -1,9 +1,9 @@
 import * as React from "react"
-import { useForm } from "@tanstack/react-form"
 import { toast } from "sonner"
 
 import { authClient } from "#/libs/auth/client"
-import { passwordSchema, fieldError } from "./schema"
+import { useForm } from "#/libs/tanstack-form"
+import { changePasswordSchema } from "./schema"
 
 export function useSettingsSecurity() {
 	const [submitError, setSubmitError] = React.useState<string | null>(null)
@@ -14,14 +14,9 @@ export function useSettingsSecurity() {
 			newPassword: "",
 			confirmPassword: "",
 		},
+		validators: { onChange: changePasswordSchema },
 		onSubmit: async ({ value }) => {
 			setSubmitError(null)
-
-			if (value.newPassword !== value.confirmPassword) {
-				setSubmitError("New passwords do not match")
-				return
-			}
-
 			try {
 				const result = await authClient.changePassword({
 					currentPassword: value.currentPassword,
@@ -44,5 +39,5 @@ export function useSettingsSecurity() {
 		},
 	})
 
-	return { form, submitError, passwordSchema, fieldError }
+	return { form, submitError }
 }

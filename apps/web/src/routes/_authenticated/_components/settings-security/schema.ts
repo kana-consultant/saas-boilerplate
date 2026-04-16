@@ -1,11 +1,17 @@
 import { z } from "zod"
 
-export const passwordSchema = z
+const password = z
 	.string()
 	.min(8, "Password must be at least 8 characters")
 	.max(72, "Password too long")
 
-export function fieldError(schema: z.ZodTypeAny, value: string) {
-	const r = schema.safeParse(value)
-	return r.success ? undefined : r.error.issues[0]?.message
-}
+export const changePasswordSchema = z
+	.object({
+		currentPassword: password,
+		newPassword: password,
+		confirmPassword: password,
+	})
+	.refine((data) => data.newPassword === data.confirmPassword, {
+		message: "Passwords do not match",
+		path: ["confirmPassword"],
+	})

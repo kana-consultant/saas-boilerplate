@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { IconBuilding } from "@tabler/icons-react"
+import { z } from "zod"
 
 import { Button } from "#/components/ui/button"
 import {
@@ -13,9 +14,19 @@ import {
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
 import { authClient } from "#/libs/auth/client"
+import { FieldError, useForm } from "#/libs/tanstack-form"
 
 export const Route = createFileRoute("/_authenticated/org/create")({
 	component: CreateOrgPage,
+})
+
+const createOrgSchema = z.object({
+	name: z.string().min(1, "Name is required").max(100, "Name too long"),
+	slug: z
+		.string()
+		.min(1, "Slug is required")
+		.max(50, "Slug too long")
+		.regex(/^[a-z0-9-]+$/, "Lowercase letters, numbers, and hyphens only"),
 })
 
 function slugify(value: string) {
@@ -29,44 +40,28 @@ function slugify(value: string) {
 
 function CreateOrgPage() {
 	const navigate = useNavigate()
-	const [name, setName] = useState("")
-	const [slug, setSlug] = useState("")
-	const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
-	const [loading, setLoading] = useState(false)
-	const [error, setError] = useState<string | null>(null)
+	const [submitError, setSubmitError] = useState<string | null>(null)
+	const slugEditedRef = useRef(false)
 
-	const handleNameChange = (value: string) => {
-		setName(value)
-		if (!slugManuallyEdited) {
-			setSlug(slugify(value))
-		}
-	}
-
-	const handleSlugChange = (value: string) => {
-		setSlugManuallyEdited(true)
-		setSlug(slugify(value))
-	}
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault()
-		if (!name.trim() || !slug.trim()) return
-
-		setLoading(true)
-		setError(null)
-
-		const { error: err } = await authClient.organization.create({
-			name: name.trim(),
-			slug: slug.trim(),
-		})
-
-		if (err) {
-			setError(err.message ?? "Failed to create organization")
-			setLoading(false)
-			return
-		}
-
-		navigate({ to: "/$orgSlug/dashboard", params: { orgSlug: slug.trim() } })
-	}
+	const form = useForm({
+		defaultValues: { name: "", slug: "" },
+		validators: { onChange: createOrgSchema },
+		onSubmit: async ({ value }) => {
+			setSubmitError(null)
+			const { error } = await authClient.organization.create({
+				name: value.name.trim(),
+				slug: value.slug.trim(),
+			})
+			if (error) {
+				setSubmitError(error.message ?? "Failed to create organization")
+				return
+			}
+			navigate({
+				to: "/$orgSlug/dashboard",
+				params: { orgSlug: value.slug.trim() },
+			})
+		},
+	})
 
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -81,40 +76,79 @@ function CreateOrgPage() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<form onSubmit={handleSubmit} className="space-y-4">
-						<div className="space-y-2">
-							<Label htmlFor="name">Organization name</Label>
-							<Input
-								id="name"
-								placeholder="Acme Inc."
-								value={name}
-								onChange={(e) => handleNameChange(e.target.value)}
-								required
-							/>
-						</div>
-						<div className="space-y-2">
-							<Label htmlFor="slug">Slug</Label>
-							<Input
-								id="slug"
-								placeholder="acme-inc"
-								value={slug}
-								onChange={(e) => handleSlugChange(e.target.value)}
-								required
-							/>
-							<p className="text-xs text-muted-foreground">
-								Used in URLs. Only lowercase letters, numbers, and hyphens.
-							</p>
-						</div>
-						{error && (
-							<p className="text-sm text-destructive">{error}</p>
+					<form
+						onSubmit={(e) => {
+							e.preventDefault()
+							form.handleSubmit()
+						}}
+						className="space-y-4"
+					>
+						<form.Field name="name">
+							{(field) => (
+								<div className="space-y-2">
+									<Label htmlFor="name">Organization name</Label>
+									<Input
+										id="name"
+										placeholder="Acme Inc."
+										value={field.state.value}
+										onChange={(e) => {
+											const v = e.target.value
+											field.handleChange(v)
+											if (!slugEditedRef.current) {
+												form.setFieldValue("slug", slugify(v))
+											}
+										}}
+										onBlur={field.handleBlur}
+										aria-invalid={field.state.meta.errors.length > 0}
+									/>
+									<FieldError field={field} />
+								</div>
+							)}
+						</form.Field>
+
+						<form.Field name="slug">
+							{(field) => (
+								<div className="space-y-2">
+									<Label htmlFor="slug">Slug</Label>
+									<Input
+										id="slug"
+										placeholder="acme-inc"
+										value={field.state.value}
+										onChange={(e) => {
+											slugEditedRef.current = true
+											field.handleChange(slugify(e.target.value))
+										}}
+										onBlur={field.handleBlur}
+										aria-invalid={field.state.meta.errors.length > 0}
+									/>
+									<p className="text-xs text-muted-foreground">
+										Used in URLs. Only lowercase letters, numbers, and hyphens.
+									</p>
+									<FieldError field={field} />
+								</div>
+							)}
+						</form.Field>
+
+						{submitError && (
+							<p className="text-sm text-destructive">{submitError}</p>
 						)}
-						<Button
-							type="submit"
-							className="w-full"
-							disabled={loading || !name.trim() || !slug.trim()}
+
+						<form.Subscribe
+							selector={(s) => ({
+								canSubmit: s.canSubmit,
+								isSubmitting: s.isSubmitting,
+							})}
 						>
-							{loading ? "Creating..." : "Create Organization"}
-						</Button>
+							{({ canSubmit, isSubmitting }) => (
+								<Button
+									type="submit"
+									className="w-full"
+									disabled={!canSubmit || isSubmitting}
+								>
+									{isSubmitting ? "Creating..." : "Create Organization"}
+								</Button>
+							)}
+						</form.Subscribe>
 					</form>
 				</CardContent>
 			</Card>

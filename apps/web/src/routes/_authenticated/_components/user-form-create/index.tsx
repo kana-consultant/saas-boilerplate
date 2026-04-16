@@ -17,14 +17,8 @@ import {
 	SheetTitle,
 } from "#/components/ui/sheet"
 import type { AppRole } from "#/libs/auth/permissions"
-import {
-	nameSchema,
-	emailSchema,
-	passwordSchema,
-	fieldError,
-	extractErrorMessage,
-	type UserFormSheetProps,
-} from "../user-form-helpers"
+import { FieldError } from "#/libs/tanstack-form"
+import { extractErrorMessage, type UserFormSheetProps } from "../user-form-helpers"
 import { useUserFormCreate } from "./hook"
 
 export function UserFormCreate({
@@ -43,15 +37,12 @@ export function UserFormCreate({
 				</SheetHeader>
 				<form
 					className="flex flex-col gap-4 px-4 py-4"
-					onSubmit={(e) => { e.preventDefault(); createForm.handleSubmit() }}
+					onSubmit={(e) => {
+						e.preventDefault()
+						createForm.handleSubmit()
+					}}
 				>
-					<createForm.Field
-						name="name"
-						validators={{
-							onChange: ({ value }) => fieldError(nameSchema, value),
-							onBlur: ({ value }) => fieldError(nameSchema, value),
-						}}
-					>
+					<createForm.Field name="name">
 						{(field) => (
 							<div className="flex flex-col gap-1.5">
 								<Label htmlFor="create-name">Name</Label>
@@ -65,22 +56,12 @@ export function UserFormCreate({
 									onBlur={field.handleBlur}
 									aria-invalid={field.state.meta.errors.length > 0}
 								/>
-								{field.state.meta.errors[0] && (
-									<p className="text-destructive text-sm" role="alert">
-										{field.state.meta.errors[0]}
-									</p>
-								)}
+								<FieldError field={field} />
 							</div>
 						)}
 					</createForm.Field>
 
-					<createForm.Field
-						name="email"
-						validators={{
-							onChange: ({ value }) => fieldError(emailSchema, value),
-							onBlur: ({ value }) => fieldError(emailSchema, value),
-						}}
-					>
+					<createForm.Field name="email">
 						{(field) => (
 							<div className="flex flex-col gap-1.5">
 								<Label htmlFor="create-email">Email</Label>
@@ -95,22 +76,12 @@ export function UserFormCreate({
 									onBlur={field.handleBlur}
 									aria-invalid={field.state.meta.errors.length > 0}
 								/>
-								{field.state.meta.errors[0] && (
-									<p className="text-destructive text-sm" role="alert">
-										{field.state.meta.errors[0]}
-									</p>
-								)}
+								<FieldError field={field} />
 							</div>
 						)}
 					</createForm.Field>
 
-					<createForm.Field
-						name="password"
-						validators={{
-							onChange: ({ value }) => fieldError(passwordSchema, value),
-							onBlur: ({ value }) => fieldError(passwordSchema, value),
-						}}
-					>
+					<createForm.Field name="password">
 						{(field) => (
 							<div className="flex flex-col gap-1.5">
 								<Label htmlFor="create-password">Password</Label>
@@ -125,11 +96,7 @@ export function UserFormCreate({
 									onBlur={field.handleBlur}
 									aria-invalid={field.state.meta.errors.length > 0}
 								/>
-								{field.state.meta.errors[0] && (
-									<p className="text-destructive text-sm" role="alert">
-										{field.state.meta.errors[0]}
-									</p>
-								)}
+								<FieldError field={field} />
 							</div>
 						)}
 					</createForm.Field>
@@ -171,16 +138,10 @@ export function UserFormCreate({
 							selector={(s) => ({
 								canSubmit: s.canSubmit,
 								isSubmitting: s.isSubmitting,
-								name: s.values.name,
-								email: s.values.email,
-								password: s.values.password,
 							})}
 						>
-							{({ canSubmit, isSubmitting, name, email, password }) => (
-								<Button
-									type="submit"
-									disabled={!canSubmit || isSubmitting || !name.trim() || !email.trim() || !password.trim()}
-								>
+							{({ canSubmit, isSubmitting }) => (
+								<Button type="submit" disabled={!canSubmit || isSubmitting}>
 									{isSubmitting ? "Creating…" : "Create"}
 								</Button>
 							)}

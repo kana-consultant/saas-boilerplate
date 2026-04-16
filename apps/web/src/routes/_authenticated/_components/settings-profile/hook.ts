@@ -1,10 +1,10 @@
 import * as React from "react"
-import { useForm } from "@tanstack/react-form"
 import { useRouter } from "@tanstack/react-router"
 import { toast } from "sonner"
 
 import { authClient } from "#/libs/auth/client"
-import { nameSchema } from "./schema"
+import { useForm } from "#/libs/tanstack-form"
+import { settingsProfileSchema } from "./schema"
 
 export function useSettingsProfile({ name }: { name: string }) {
 	const router = useRouter()
@@ -12,6 +12,7 @@ export function useSettingsProfile({ name }: { name: string }) {
 
 	const form = useForm({
 		defaultValues: { name },
+		validators: { onChange: settingsProfileSchema },
 		onSubmit: async ({ value }) => {
 			setSubmitError(null)
 			try {
@@ -26,10 +27,5 @@ export function useSettingsProfile({ name }: { name: string }) {
 		},
 	})
 
-	const validateName = (value: string) => {
-		const r = nameSchema.safeParse(value)
-		return r.success ? undefined : r.error.issues[0]?.message
-	}
-
-	return { form, submitError, validateName }
+	return { form, submitError }
 }

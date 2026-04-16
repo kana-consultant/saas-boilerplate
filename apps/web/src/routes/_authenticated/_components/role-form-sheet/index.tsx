@@ -10,14 +10,8 @@ import {
 	SheetTitle,
 } from "#/components/ui/sheet"
 import { Textarea } from "#/components/ui/textarea"
-import {
-	idSchema,
-	labelSchema,
-	descriptionSchema,
-	fieldError,
-	extractErrorMessage,
-	type RoleFormSheetProps,
-} from "../role-form-helpers"
+import { FieldError } from "#/libs/tanstack-form"
+import { extractErrorMessage, type RoleFormSheetProps } from "../role-form-helpers"
 import { useRoleFormSheet } from "./hook"
 
 export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetProps) {
@@ -36,16 +30,13 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 				</SheetHeader>
 				<form
 					className="flex flex-col gap-4 px-4 py-4"
-					onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }}
+					onSubmit={(e) => {
+						e.preventDefault()
+						form.handleSubmit()
+					}}
 				>
 					{mode === "create" && (
-						<form.Field
-							name="id"
-							validators={{
-								onChange: ({ value }) => fieldError(idSchema, value),
-								onBlur: ({ value }) => fieldError(idSchema, value),
-							}}
-						>
+						<form.Field name="id">
 							{(field) => (
 								<div className="flex flex-col gap-1.5">
 									<Label htmlFor="role-id">Role ID</Label>
@@ -61,23 +52,13 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 									<p className="text-muted-foreground text-xs">
 										Lowercase letters, numbers, hyphens. Cannot be changed later.
 									</p>
-									{field.state.meta.errors[0] && (
-										<p className="text-destructive text-sm" role="alert">
-											{field.state.meta.errors[0]}
-										</p>
-									)}
+									<FieldError field={field} />
 								</div>
 							)}
 						</form.Field>
 					)}
 
-					<form.Field
-						name="label"
-						validators={{
-							onChange: ({ value }) => fieldError(labelSchema, value),
-							onBlur: ({ value }) => fieldError(labelSchema, value),
-						}}
-					>
+					<form.Field name="label">
 						{(field) => (
 							<div className="flex flex-col gap-1.5">
 								<Label htmlFor="role-label">Display Name</Label>
@@ -90,22 +71,12 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 									onBlur={field.handleBlur}
 									aria-invalid={field.state.meta.errors.length > 0}
 								/>
-								{field.state.meta.errors[0] && (
-									<p className="text-destructive text-sm" role="alert">
-										{field.state.meta.errors[0]}
-									</p>
-								)}
+								<FieldError field={field} />
 							</div>
 						)}
 					</form.Field>
 
-					<form.Field
-						name="description"
-						validators={{
-							onChange: ({ value }) => fieldError(descriptionSchema, value),
-							onBlur: ({ value }) => fieldError(descriptionSchema, value),
-						}}
-					>
+					<form.Field name="description">
 						{(field) => (
 							<div className="flex flex-col gap-1.5">
 								<Label htmlFor="role-description">Description</Label>
@@ -119,11 +90,7 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 									onBlur={field.handleBlur}
 									aria-invalid={field.state.meta.errors.length > 0}
 								/>
-								{field.state.meta.errors[0] && (
-									<p className="text-destructive text-sm" role="alert">
-										{field.state.meta.errors[0]}
-									</p>
-								)}
+								<FieldError field={field} />
 							</div>
 						)}
 					</form.Field>
@@ -142,20 +109,10 @@ export function RoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetP
 							selector={(s) => ({
 								canSubmit: s.canSubmit,
 								isSubmitting: s.isSubmitting,
-								id: s.values.id,
-								label: s.values.label,
 							})}
 						>
-							{({ canSubmit, isSubmitting, id, label }) => (
-								<Button
-									type="submit"
-									disabled={
-										!canSubmit ||
-										isSubmitting ||
-										!label.trim() ||
-										(mode === "create" && !id.trim())
-									}
-								>
+							{({ canSubmit, isSubmitting }) => (
+								<Button type="submit" disabled={!canSubmit || isSubmitting}>
 									{isSubmitting
 										? mode === "create" ? "Creating…" : "Saving…"
 										: mode === "create" ? "Create" : "Save"}

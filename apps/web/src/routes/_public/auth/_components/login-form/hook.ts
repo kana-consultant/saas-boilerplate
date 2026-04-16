@@ -3,7 +3,7 @@ import { redirect, useRouter } from "@tanstack/react-router"
 
 import { authClient } from "#/libs/auth/client"
 import { useForm } from "#/libs/tanstack-form"
-import { validate } from "./schema"
+import { loginSchema } from "./schema"
 
 export function useLoginForm() {
 	const router = useRouter()
@@ -11,6 +11,7 @@ export function useLoginForm() {
 
 	const form = useForm({
 		defaultValues: { email: "", password: "" },
+		validators: { onChange: loginSchema },
 		onSubmit: async ({ value }) => {
 			const { error } = await authClient.signIn.email(value)
 			if (error) {
@@ -22,5 +23,5 @@ export function useLoginForm() {
 		},
 	})
 
-	return { form, formError, validate }
+	return { form, formError }
 }

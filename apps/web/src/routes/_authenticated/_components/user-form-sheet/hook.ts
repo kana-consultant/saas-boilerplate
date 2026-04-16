@@ -1,10 +1,14 @@
 import * as React from "react"
-import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 import { orpc } from "#/libs/orpc/client"
-import { extractErrorMessage, type UserFormSheetProps } from "../user-form-helpers"
+import { useForm } from "#/libs/tanstack-form"
+import {
+	editUserSchema,
+	extractErrorMessage,
+	type UserFormSheetProps,
+} from "../user-form-helpers"
 
 export function useUserFormSheet({
 	mode,
@@ -41,6 +45,7 @@ export function useUserFormSheet({
 			name: user?.name ?? "",
 			email: user?.email ?? "",
 		},
+		validators: { onChange: editUserSchema },
 		onSubmit: async ({ value }) => {
 			if (!user) return
 			await updateUser.mutateAsync({

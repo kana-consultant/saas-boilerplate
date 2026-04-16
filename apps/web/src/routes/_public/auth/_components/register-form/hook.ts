@@ -3,7 +3,7 @@ import { redirect, useRouter } from "@tanstack/react-router"
 
 import { authClient } from "#/libs/auth/client"
 import { useForm } from "#/libs/tanstack-form"
-import { validate } from "./schema"
+import { registerSchema } from "./schema"
 
 export function useRegisterForm() {
 	const router = useRouter()
@@ -11,6 +11,7 @@ export function useRegisterForm() {
 
 	const form = useForm({
 		defaultValues: { name: "", email: "", password: "" },
+		validators: { onChange: registerSchema },
 		onSubmit: async ({ value }) => {
 			const { error } = await authClient.signUp.email(value)
 			if (error) {
@@ -22,5 +23,5 @@ export function useRegisterForm() {
 		},
 	})
 
-	return { form, formError, validate }
+	return { form, formError }
 }

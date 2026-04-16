@@ -2,10 +2,11 @@ import { Button } from "#/components/ui/button"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
 import { Separator } from "#/components/ui/separator"
+import { FieldError } from "#/libs/tanstack-form"
 import { useSettingsSecurity } from "./hook"
 
 export function SettingsSecurity() {
-	const { form, submitError, passwordSchema, fieldError } = useSettingsSecurity()
+	const { form, submitError } = useSettingsSecurity()
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -23,15 +24,12 @@ export function SettingsSecurity() {
 
 				<form
 					className="flex max-w-sm flex-col gap-4"
-					onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }}
+					onSubmit={(e) => {
+						e.preventDefault()
+						form.handleSubmit()
+					}}
 				>
-					<form.Field
-						name="currentPassword"
-						validators={{
-							onChange: ({ value }) => fieldError(passwordSchema, value),
-							onBlur: ({ value }) => fieldError(passwordSchema, value),
-						}}
-					>
+					<form.Field name="currentPassword">
 						{(field) => (
 							<div className="flex flex-col gap-1.5">
 								<Label htmlFor="current-password">Current Password</Label>
@@ -46,22 +44,12 @@ export function SettingsSecurity() {
 									onBlur={field.handleBlur}
 									aria-invalid={field.state.meta.errors.length > 0}
 								/>
-								{field.state.meta.errors[0] && (
-									<p className="text-destructive text-sm" role="alert">
-										{field.state.meta.errors[0]}
-									</p>
-								)}
+								<FieldError field={field} />
 							</div>
 						)}
 					</form.Field>
 
-					<form.Field
-						name="newPassword"
-						validators={{
-							onChange: ({ value }) => fieldError(passwordSchema, value),
-							onBlur: ({ value }) => fieldError(passwordSchema, value),
-						}}
-					>
+					<form.Field name="newPassword">
 						{(field) => (
 							<div className="flex flex-col gap-1.5">
 								<Label htmlFor="new-password">New Password</Label>
@@ -76,30 +64,12 @@ export function SettingsSecurity() {
 									onBlur={field.handleBlur}
 									aria-invalid={field.state.meta.errors.length > 0}
 								/>
-								{field.state.meta.errors[0] && (
-									<p className="text-destructive text-sm" role="alert">
-										{field.state.meta.errors[0]}
-									</p>
-								)}
+								<FieldError field={field} />
 							</div>
 						)}
 					</form.Field>
 
-					<form.Field
-						name="confirmPassword"
-						validators={{
-							onChange: ({ value, fieldApi }) => {
-								const newPwd = fieldApi.form.getFieldValue("newPassword")
-								if (value && newPwd && value !== newPwd) return "Passwords do not match"
-								return fieldError(passwordSchema, value)
-							},
-							onBlur: ({ value, fieldApi }) => {
-								const newPwd = fieldApi.form.getFieldValue("newPassword")
-								if (value && newPwd && value !== newPwd) return "Passwords do not match"
-								return fieldError(passwordSchema, value)
-							},
-						}}
-					>
+					<form.Field name="confirmPassword">
 						{(field) => (
 							<div className="flex flex-col gap-1.5">
 								<Label htmlFor="confirm-password">Confirm New Password</Label>
@@ -114,11 +84,7 @@ export function SettingsSecurity() {
 									onBlur={field.handleBlur}
 									aria-invalid={field.state.meta.errors.length > 0}
 								/>
-								{field.state.meta.errors[0] && (
-									<p className="text-destructive text-sm" role="alert">
-										{field.state.meta.errors[0]}
-									</p>
-								)}
+								<FieldError field={field} />
 							</div>
 						)}
 					</form.Field>
@@ -132,22 +98,10 @@ export function SettingsSecurity() {
 							selector={(s) => ({
 								canSubmit: s.canSubmit,
 								isSubmitting: s.isSubmitting,
-								currentPassword: s.values.currentPassword,
-								newPassword: s.values.newPassword,
-								confirmPassword: s.values.confirmPassword,
 							})}
 						>
-							{({ canSubmit, isSubmitting, currentPassword, newPassword, confirmPassword }) => (
-								<Button
-									type="submit"
-									disabled={
-										!canSubmit ||
-										isSubmitting ||
-										!currentPassword.trim() ||
-										!newPassword.trim() ||
-										!confirmPassword.trim()
-									}
-								>
+							{({ canSubmit, isSubmitting }) => (
+								<Button type="submit" disabled={!canSubmit || isSubmitting}>
 									{isSubmitting ? "Updating…" : "Update Password"}
 								</Button>
 							)}

@@ -1,38 +1,37 @@
 import { useState } from "react"
-import type { FormEvent } from "react"
 import { toast } from "sonner"
 
 import { authClient } from "#/libs/auth/client"
-import { type OrgRole, type OrgInviteFormProps } from "./schema"
+import { useForm } from "#/libs/tanstack-form"
+import { orgInviteSchema, type OrgInviteFormProps } from "./schema"
 
 export function useOrgInviteForm({ organizationId, onInvited }: OrgInviteFormProps) {
-	const [inviteEmail, setInviteEmail] = useState("")
-	const [inviteRole, setInviteRole] = useState<OrgRole>("member")
-	const [inviting, setInviting] = useState(false)
 	const [inviteError, setInviteError] = useState<string | null>(null)
 
-	const handleInvite = async (e: FormEvent<HTMLFormElement>) => {
-		e.preventDefault()
-		if (!inviteEmail.trim()) return
-		setInviting(true)
-		setInviteError(null)
+	const form = useForm({
+		defaultValues: {
+			email: "",
+			role: "member" as "owner" | "admin" | "member",
+		},
+		validators: { onChange: orgInviteSchema },
+		onSubmit: async ({ value }) => {
+			setInviteError(null)
+			const { error } = await authClient.organization.inviteMember({
+				organizationId,
+				email: value.email.trim(),
+				role: value.role,
+			})
+			if (error) {
+				const msg = error.message ?? "Failed to send invitation"
+				setInviteError(msg)
+				toast.error(msg)
+			} else {
+				form.reset()
+				toast.success("Invitation sent")
+				onInvited?.()
+			}
+		},
+	})
 
-		const { error } = await authClient.organization.inviteMember({
-			organizationId,
-			email: inviteEmail.trim(),
-			role: inviteRole,
-		})
-
-		if (error) {
-			setInviteError(error.message ?? "Failed to send invitation")
-			toast.error(error.message ?? "Failed to send invitation")
-		} else {
-			setInviteEmail("")
-			toast.success("Invitation sent")
-			onInvited?.()
-		}
-		setInviting(false)
-	}
-
-	return { inviteEmail, setInviteEmail, inviteRole, setInviteRole, inviting, inviteError, handleInvite }
+	return { form, inviteError }
 }

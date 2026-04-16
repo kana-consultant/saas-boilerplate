@@ -3,11 +3,12 @@ import { Button } from "#/components/ui/button"
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
 import { Separator } from "#/components/ui/separator"
+import { FieldError } from "#/libs/tanstack-form"
 import { useSettingsProfile } from "./hook"
 import { type SettingsProfileProps } from "./schema"
 
 export function SettingsProfile({ name, email, role, createdAt }: SettingsProfileProps) {
-	const { form, submitError, validateName } = useSettingsProfile({ name })
+	const { form, submitError } = useSettingsProfile({ name })
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -22,16 +23,13 @@ export function SettingsProfile({ name, email, role, createdAt }: SettingsProfil
 
 			<form
 				className="flex flex-col gap-5"
-				onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }}
+				onSubmit={(e) => {
+					e.preventDefault()
+					form.handleSubmit()
+				}}
 			>
 				<div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-					<form.Field
-						name="name"
-						validators={{
-							onChange: ({ value }) => validateName(value),
-							onBlur: ({ value }) => validateName(value),
-						}}
-					>
+					<form.Field name="name">
 						{(field) => (
 							<div className="flex flex-col gap-1.5">
 								<Label htmlFor="settings-name">Full Name</Label>
@@ -45,11 +43,7 @@ export function SettingsProfile({ name, email, role, createdAt }: SettingsProfil
 									onBlur={field.handleBlur}
 									aria-invalid={field.state.meta.errors.length > 0}
 								/>
-								{field.state.meta.errors[0] && (
-									<p className="text-destructive text-sm" role="alert">
-										{field.state.meta.errors[0]}
-									</p>
-								)}
+								<FieldError field={field} />
 							</div>
 						)}
 					</form.Field>
@@ -87,10 +81,10 @@ export function SettingsProfile({ name, email, role, createdAt }: SettingsProfil
 
 				<div>
 					<form.Subscribe
-						selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting, name: s.values.name })}
+						selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
 					>
-						{({ canSubmit, isSubmitting, name: nameValue }) => (
-							<Button type="submit" disabled={!canSubmit || isSubmitting || !nameValue.trim()}>
+						{({ canSubmit, isSubmitting }) => (
+							<Button type="submit" disabled={!canSubmit || isSubmitting}>
 								{isSubmitting ? "Saving…" : "Save Changes"}
 							</Button>
 						)}

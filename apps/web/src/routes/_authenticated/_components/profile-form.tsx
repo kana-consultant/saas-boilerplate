@@ -1,5 +1,4 @@
 import * as React from "react"
-import { useForm } from "@tanstack/react-form"
 import { useRouter } from "@tanstack/react-router"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -16,11 +15,11 @@ import {
 import { Input } from "#/components/ui/input"
 import { Label } from "#/components/ui/label"
 import { authClient } from "#/libs/auth/client"
+import { FieldError, useForm } from "#/libs/tanstack-form"
 
-const nameSchema = z
-	.string()
-	.min(1, "Name is required")
-	.max(100, "Name too long")
+const profileFormSchema = z.object({
+	name: z.string().min(1, "Name is required").max(100, "Name too long"),
+})
 
 interface ProfileFormProps {
 	name: string
@@ -35,6 +34,7 @@ export function ProfileForm({ name, email, role, createdAt }: ProfileFormProps) 
 
 	const form = useForm({
 		defaultValues: { name },
+		validators: { onChange: profileFormSchema },
 		onSubmit: async ({ value }) => {
 			setSubmitError(null)
 			try {
@@ -63,19 +63,7 @@ export function ProfileForm({ name, email, role, createdAt }: ProfileFormProps) 
 					}}
 					className="flex flex-col gap-4"
 				>
-					<form.Field
-						name="name"
-						validators={{
-							onChange: ({ value }) => {
-								const result = nameSchema.safeParse(value)
-								return result.success ? undefined : result.error.issues[0]?.message
-							},
-							onBlur: ({ value }) => {
-								const result = nameSchema.safeParse(value)
-								return result.success ? undefined : result.error.issues[0]?.message
-							},
-						}}
-					>
+					<form.Field name="name">
 						{(field) => (
 							<div className="flex flex-col gap-1.5">
 								<Label htmlFor="profile-name">Name</Label>
@@ -89,11 +77,7 @@ export function ProfileForm({ name, email, role, createdAt }: ProfileFormProps) 
 									onBlur={field.handleBlur}
 									aria-invalid={field.state.meta.errors.length > 0}
 								/>
-								{field.state.meta.errors.length > 0 && (
-									<p className="text-destructive text-sm" role="alert">
-										{field.state.meta.errors[0]}
-									</p>
-								)}
+								<FieldError field={field} />
 							</div>
 						)}
 					</form.Field>
@@ -136,13 +120,12 @@ export function ProfileForm({ name, email, role, createdAt }: ProfileFormProps) 
 						selector={(s) => ({
 							canSubmit: s.canSubmit,
 							isSubmitting: s.isSubmitting,
-							name: s.values.name,
 						})}
 					>
-						{({ canSubmit, isSubmitting, name: nameValue }) => (
+						{({ canSubmit, isSubmitting }) => (
 							<Button
 								type="submit"
-								disabled={!canSubmit || isSubmitting || !nameValue.trim()}
+								disabled={!canSubmit || isSubmitting}
 								className="self-start"
 							>
 								{isSubmitting ? "Saving…" : "Save changes"}

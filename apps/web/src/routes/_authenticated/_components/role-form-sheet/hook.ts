@@ -1,10 +1,15 @@
 import * as React from "react"
-import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 import { orpc } from "#/libs/orpc/client"
-import { extractErrorMessage, type RoleFormSheetProps } from "../role-form-helpers"
+import { useForm } from "#/libs/tanstack-form"
+import {
+	createRoleSchema,
+	editRoleSchema,
+	extractErrorMessage,
+	type RoleFormSheetProps,
+} from "../role-form-helpers"
 
 export function useRoleFormSheet({ mode, role, open, onOpenChange }: RoleFormSheetProps) {
 	const queryClient = useQueryClient()
@@ -39,6 +44,9 @@ export function useRoleFormSheet({ mode, role, open, onOpenChange }: RoleFormShe
 			id: role?.id ?? "",
 			label: role?.label ?? "",
 			description: role?.description ?? "",
+		},
+		validators: {
+			onChange: mode === "create" ? createRoleSchema : editRoleSchema,
 		},
 		onSubmit: async ({ value }) => {
 			if (mode === "create") {

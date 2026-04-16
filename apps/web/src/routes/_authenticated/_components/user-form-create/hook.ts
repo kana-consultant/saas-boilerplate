@@ -1,10 +1,14 @@
-import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 import { useHasPermission } from "#/routes/_public/auth/_hooks/use-has-permission"
 import { orpc } from "#/libs/orpc/client"
-import { extractErrorMessage, type UserFormSheetProps } from "../user-form-helpers"
+import { useForm } from "#/libs/tanstack-form"
+import {
+	createUserSchema,
+	extractErrorMessage,
+	type UserFormSheetProps,
+} from "../user-form-helpers"
 
 export function useUserFormCreate({
 	defaultRole = "member",
@@ -33,6 +37,7 @@ export function useUserFormCreate({
 			password: "",
 			role: defaultRole,
 		},
+		validators: { onChange: createUserSchema },
 		onSubmit: async ({ value }) => {
 			await createUser.mutateAsync({
 				name: value.name.trim(),

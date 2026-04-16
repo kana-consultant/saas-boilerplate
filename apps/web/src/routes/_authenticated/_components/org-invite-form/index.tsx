@@ -15,19 +15,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#/components/ui/select"
+import { FieldError } from "#/libs/tanstack-form"
 import { useOrgInviteForm } from "./hook"
-import { ROLES, type OrgInviteFormProps } from "./schema"
+import { ROLES, type OrgInviteFormProps, type OrgRole } from "./schema"
 
 export function OrgInviteForm({ organizationId, onInvited }: OrgInviteFormProps) {
-	const {
-		inviteEmail,
-		setInviteEmail,
-		inviteRole,
-		setInviteRole,
-		inviting,
-		inviteError,
-		handleInvite,
-	} = useOrgInviteForm({ organizationId, onInvited })
+	const { form, inviteError } = useOrgInviteForm({ organizationId, onInvited })
 
 	return (
 		<Card>
@@ -38,33 +31,63 @@ export function OrgInviteForm({ organizationId, onInvited }: OrgInviteFormProps)
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<form onSubmit={handleInvite} className="flex gap-3">
-					<div className="flex-1 space-y-1">
-						<Label htmlFor="invite-email" className="sr-only">Email</Label>
-						<Input
-							id="invite-email"
-							type="email"
-							placeholder="colleague@example.com"
-							value={inviteEmail}
-							onChange={(e) => setInviteEmail(e.target.value)}
-							required
-						/>
-					</div>
-					<Select value={inviteRole} onValueChange={(v) => setInviteRole(v as typeof inviteRole)}>
-						<SelectTrigger className="w-32">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							{ROLES.map((r) => (
-								<SelectItem key={r} value={r}>
-									{r.charAt(0).toUpperCase() + r.slice(1)}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-					<Button type="submit" disabled={inviting}>
-						{inviting ? "Sending..." : "Invite"}
-					</Button>
+				<form
+					onSubmit={(e) => {
+						e.preventDefault()
+						form.handleSubmit()
+					}}
+					className="flex gap-3"
+				>
+					<form.Field name="email">
+						{(field) => (
+							<div className="flex-1 space-y-1">
+								<Label htmlFor="invite-email" className="sr-only">Email</Label>
+								<Input
+									id="invite-email"
+									type="email"
+									placeholder="colleague@example.com"
+									value={field.state.value}
+									onChange={(e) => field.handleChange(e.target.value)}
+									onBlur={field.handleBlur}
+									aria-invalid={field.state.meta.errors.length > 0}
+								/>
+								<FieldError field={field} />
+							</div>
+						)}
+					</form.Field>
+
+					<form.Field name="role">
+						{(field) => (
+							<Select
+								value={field.state.value}
+								onValueChange={(v) => field.handleChange(v as OrgRole)}
+							>
+								<SelectTrigger className="w-32">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{ROLES.map((r) => (
+										<SelectItem key={r} value={r}>
+											{r.charAt(0).toUpperCase() + r.slice(1)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						)}
+					</form.Field>
+
+					<form.Subscribe
+						selector={(s) => ({
+							canSubmit: s.canSubmit,
+							isSubmitting: s.isSubmitting,
+						})}
+					>
+						{({ canSubmit, isSubmitting }) => (
+							<Button type="submit" disabled={!canSubmit || isSubmitting}>
+								{isSubmitting ? "Sending..." : "Invite"}
+							</Button>
+						)}
+					</form.Subscribe>
 				</form>
 				{inviteError && (
 					<p className="mt-2 text-sm text-destructive">{inviteError}</p>

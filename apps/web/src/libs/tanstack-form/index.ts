@@ -11,3 +11,4 @@ export type {
 	FieldApi,
 	ReactFormApi,
 } from "@tanstack/react-form"
+export { FieldError } from "./field-error"
