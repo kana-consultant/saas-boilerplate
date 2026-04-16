@@ -215,6 +215,11 @@
                 --external:pg-native \
                 --banner:js="import { createRequire as _crq } from 'node:module'; const require = _crq(import.meta.url);" \
                 --outfile=apps/api/dist/migrate.mjs
+              esbuild apps/api/src/infrastructure/db/seed.ts \
+                --bundle --platform=node --target=node22 --format=esm \
+                --external:pg-native \
+                --banner:js="import { createRequire as _crq } from 'node:module'; const require = _crq(import.meta.url);" \
+                --outfile=apps/api/dist/seed.mjs
 
               runHook postBuild
             '';
@@ -228,6 +233,7 @@
               mkdir -p "$appDir/api"
               cp apps/api/dist/main.mjs    "$appDir/api/main.mjs"
               cp apps/api/dist/migrate.mjs "$appDir/api/migrate.mjs"
+              cp apps/api/dist/seed.mjs    "$appDir/api/seed.mjs"
 
               cp -r apps/api/drizzle "$appDir/api/drizzle"
 
@@ -251,6 +257,14 @@
               exec ${pkgs.nodejs_22}/bin/node migrate.mjs "\$@"
               EOF
               chmod +x "$out/bin/saas-boilerplate-migrate"
+
+              cat > "$out/bin/saas-boilerplate-seed" <<EOF
+              #!/bin/sh
+              set -e
+              cd "$appDir/api"
+              exec ${pkgs.nodejs_22}/bin/node seed.mjs "\$@"
+              EOF
+              chmod +x "$out/bin/saas-boilerplate-seed"
 
               runHook postInstall
             '';
