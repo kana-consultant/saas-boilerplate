@@ -5,6 +5,7 @@ import { organization } from "better-auth/plugins/organization"
 import { eq } from "drizzle-orm"
 
 import type { ActivityRepository } from "#/domain/activity/activity-repository.ts"
+import { env } from "../config/env.ts"
 import type { Db } from "../db/client.ts"
 import * as schema from "../db/schema.ts"
 import { ac, platformRoles } from "./permissions.ts"
@@ -15,17 +16,21 @@ export interface BuildAuthDeps {
 }
 
 export function buildAuth({ db, activityRepo }: BuildAuthDeps) {
+	const googleConfigured =
+		env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+			? {
+					google: {
+						clientId: env.GOOGLE_CLIENT_ID,
+						clientSecret: env.GOOGLE_CLIENT_SECRET,
+					},
+				}
+			: undefined
 	return betterAuth({
 		database: drizzleAdapter(db, { provider: "pg" }),
 		emailAndPassword: {
 			enabled: true,
 		},
-		socialProviders: {
-			google: {
-				clientId: process.env.GOOGLE_CLIENT_ID!,
-				clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-			},
-		},
+		...(googleConfigured ? { socialProviders: googleConfigured } : {}),
 		databaseHooks: {
 			user: {
 				create: {

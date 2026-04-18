@@ -8,7 +8,7 @@ A full-stack SaaS starter split into a **Hono** backend and a **TanStack Router 
 |-------|-----------|
 | Monorepo | moon + pnpm workspaces |
 | Frontend | React 19 + TanStack Router (SPA, file-based) + Vite |
-| Backend | Hono + oRPC (RPC + OpenAPI) + MCP |
+| Backend | Hono + oRPC (RPC + OpenAPI) |
 | Data fetching | TanStack Query + oRPC client |
 | Auth | better-auth (email/password, Google OAuth) |
 | Database | PostgreSQL 16 + Drizzle ORM |
@@ -189,6 +189,8 @@ pnpm db:push       # push schema directly (dev)
 pnpm db:studio     # open Drizzle Studio
 pnpm db:seed       # seed demo data
 ```
+
+**Dev vs Prod:** Use `db:push` for local iteration (no migration files). For staging/prod, **always** use the versioned flow: edit `schema.ts` → `pnpm db:generate` → commit the new SQL under `apps/api/drizzle/` → deploy runs `pnpm db:migrate`. CI runs `drizzle-kit generate` on every PR and fails if uncommitted migration drift is detected.
 
 Or run directly inside `apps/api`:
 

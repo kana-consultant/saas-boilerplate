@@ -5,10 +5,7 @@ import type {
 } from "#/application/shared/context.ts"
 import { AppError } from "#/application/shared/errors.ts"
 import type { AppRole, Resource } from "#/domain/role/permissions.ts"
-import {
-	hasPermission,
-	PLATFORM_SUPER_ADMIN,
-} from "#/domain/role/permissions.ts"
+import { PLATFORM_SUPER_ADMIN } from "#/domain/role/permissions.ts"
 import type { ORPCContext } from "./context.ts"
 
 export const publicProcedure = os
@@ -46,12 +43,19 @@ export const requireRole = (...allowedRoles: AppRole[]) =>
 	})
 
 export const requirePermission = (resource: Resource, actions: string[]) =>
-	protectedProcedure.use((options) => {
+	protectedProcedure.use(async (options) => {
 		const role = options.context.orgRole
-		if (!role) {
+		const orgId = options.context.session.session?.activeOrganizationId
+		if (!role || !orgId) {
 			throw new ORPCError("FORBIDDEN", { message: "No org membership" })
 		}
-		if (!hasPermission(role, resource, actions)) {
+		const allowed = await options.context.useCases.role.check(
+			orgId,
+			role,
+			resource,
+			actions,
+		)
+		if (!allowed) {
 			throw new ORPCError("FORBIDDEN", { message: "Permission denied" })
 		}
 		return options.next({ context: options.context })

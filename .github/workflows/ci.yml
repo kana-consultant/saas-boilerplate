@@ -36,6 +36,15 @@ jobs:
       - name: Typecheck @saas/api
         run: pnpm --filter @saas/api exec tsc --noEmit
 
+      - name: Drizzle migration drift check
+        run: |
+          pnpm --filter @saas/api exec drizzle-kit generate --name=ci_drift_check
+          if ! git diff --quiet --exit-code apps/api/drizzle; then
+            echo "::error::schema.ts drifted from migrations — run 'pnpm db:generate' and commit"
+            git diff apps/api/drizzle
+            exit 1
+          fi
+
       - name: Build @saas/web (also generates routeTree + paraglide)
         run: pnpm --filter @saas/web build
 

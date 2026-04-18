@@ -1,7 +1,9 @@
 import type { ActivityRepository } from "#/domain/activity/activity-repository.ts"
+import type { Cache } from "#/domain/ports/cache.ts"
 import type { PermissionRepository } from "#/domain/role/role-repository.ts"
 import type { AuthedContext } from "../shared/context.ts"
 import { requireActiveOrg } from "../shared/context.ts"
+import { invalidatePermissionsCache } from "./check-permission.ts"
 
 export interface SetRolePermissionInput {
 	roleId: string
@@ -13,6 +15,7 @@ export interface SetRolePermissionInput {
 export interface SetRolePermissionDeps {
 	permRepo: PermissionRepository
 	activityRepo: ActivityRepository
+	cache: Cache
 }
 
 export function makeSetRolePermission(deps: SetRolePermissionDeps) {
@@ -29,6 +32,7 @@ export function makeSetRolePermission(deps: SetRolePermissionDeps) {
 		} else {
 			await deps.permRepo.revoke(row)
 		}
+		await invalidatePermissionsCache(deps.cache, activeOrgId)
 		await deps.activityRepo.insert({
 			userId: ctx.session.user.id,
 			organizationId: activeOrgId,

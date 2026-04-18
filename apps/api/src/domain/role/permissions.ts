@@ -1,3 +1,19 @@
+// Two distinct role namespaces:
+//
+//   Platform role (user.role)     : 'user' | 'admin' | 'super-admin'
+//     - Managed by better-auth admin plugin (defaultRole: "user").
+//     - Global scope. `super-admin` bypasses org checks everywhere.
+//
+//   Org role (member.role)         : 'owner' | 'admin' | 'member' (AppRole)
+//     - Managed per-organization via the better-auth organization plugin.
+//     - Scope is one organization; same user can have different roles in
+//       different orgs.
+//
+// A brand-new user has platform role 'user' and no org role until added to
+// an org as 'member'. The two namespaces deliberately don't share vocab —
+// `user` (platform) vs `member` (org) — to keep the distinction visible at
+// every call site. `platformRoles` in infrastructure/auth/permissions.ts
+// maps `user` onto `memberRole` for better-auth's access-control shape.
 export const PLATFORM_SUPER_ADMIN = "super-admin"
 
 export type AppRole = "owner" | "admin" | "member"

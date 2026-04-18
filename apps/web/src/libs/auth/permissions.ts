@@ -1,62 +1,36 @@
 import { createAccessControl } from "better-auth/plugins/access"
 
-export const PLATFORM_SUPER_ADMIN = "super-admin"
+import {
+	PLATFORM_SUPER_ADMIN,
+	resourceActions,
+	rolePermissions,
+} from "#/domain/role/permissions.ts"
 
-export const resourceActions = {
-	user: [
-		"create",
-		"list",
-		"set-role",
-		"ban",
-		"impersonate",
-		"impersonate-admins",
-		"delete",
-		"set-password",
-		"get",
-		"update",
-	],
-	session: ["list", "revoke", "delete"],
-	"activity-log": ["list", "export"],
-} as const
+export { PLATFORM_SUPER_ADMIN, resourceActions }
+export type { AppRole } from "#/domain/role/permissions.ts"
 
-export const ac = createAccessControl(resourceActions)
+type Statements = { [K in keyof typeof resourceActions]: readonly string[] }
 
-export const ownerRole = ac.newRole({
-	user: [
-		"create",
-		"list",
-		"set-role",
-		"ban",
-		"impersonate",
-		"impersonate-admins",
-		"delete",
-		"set-password",
-		"get",
-		"update",
-	],
-	session: ["list", "revoke", "delete"],
-	"activity-log": ["list", "export"],
-})
+export const ac = createAccessControl(resourceActions as unknown as Statements)
 
-export const adminRole = ac.newRole({
-	user: ["create", "list", "ban", "get", "update"],
-	session: ["list", "revoke"],
-	"activity-log": ["list"],
-})
+const buildRole = (roleKey: keyof typeof rolePermissions) => {
+	const perms = rolePermissions[roleKey]
+	const stmt: Record<string, readonly string[]> = {}
+	for (const [resource, actions] of Object.entries(perms)) {
+		stmt[resource] = actions ?? []
+	}
+	return ac.newRole(stmt as Statements)
+}
 
-export const memberRole = ac.newRole({
-	user: ["get"],
-	session: [],
-	"activity-log": [],
-})
+export const ownerRole = buildRole("owner")
+export const adminRole = buildRole("admin")
+export const memberRole = buildRole("member")
 
 export const roles = {
 	owner: ownerRole,
 	admin: adminRole,
 	member: memberRole,
 } as const
-
-export type AppRole = keyof typeof roles
 
 export const platformRoles = {
 	"super-admin": ownerRole,

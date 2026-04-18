@@ -74,6 +74,7 @@ const makeDeps = (
 		set: vi.fn(),
 		del: vi.fn(),
 		delPattern: vi.fn(),
+		ping: vi.fn().mockResolvedValue(true),
 	}
 	return { orgRepo, memberRepo, cache }
 }

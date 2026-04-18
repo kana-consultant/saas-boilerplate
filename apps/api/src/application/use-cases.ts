@@ -15,6 +15,7 @@ import { makeGetOrgContext } from "./auth/get-org-context.ts"
 import { makeGetOrgRole } from "./auth/get-org-role.ts"
 import { makeGetSession } from "./auth/get-session.ts"
 import { makeListOrganizations } from "./auth/list-organizations.ts"
+import { makeCheckPermission } from "./role/check-permission.ts"
 import { makeCreateRole } from "./role/create-role.ts"
 import { makeDeleteRole } from "./role/delete-role.ts"
 import { makeListRolePermissions } from "./role/list-role-permissions.ts"
@@ -92,6 +93,7 @@ export function buildUseCases(deps: Dependencies) {
 			}),
 			delete: makeDeleteUser({
 				auth: deps.auth,
+				memberRepo: deps.memberRepo,
 				activityRepo: deps.activityRepo,
 			}),
 		},
@@ -116,6 +118,13 @@ export function buildUseCases(deps: Dependencies) {
 			setPermission: makeSetRolePermission({
 				permRepo: deps.permRepo,
 				activityRepo: deps.activityRepo,
+				cache: deps.cache,
+			}),
+			check: makeCheckPermission({
+				permRepo: deps.permRepo,
+				roleRepo: deps.roleRepo,
+				cache: deps.cache,
+				seedPermissions,
 			}),
 		},
 		activity: {

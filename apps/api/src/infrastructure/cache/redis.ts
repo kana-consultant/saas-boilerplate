@@ -1,6 +1,7 @@
 import Redis from "ioredis"
 
 import type { Cache } from "#/domain/ports/cache.ts"
+import { logger } from "#/infrastructure/observability/logger.ts"
 
 export function createRedisCache(url: string): Cache {
 	let _redis: Redis | null = null
@@ -13,7 +14,7 @@ export function createRedisCache(url: string): Cache {
 				lazyConnect: true,
 			})
 			_redis.on("error", (err) => {
-				console.warn("[redis] error:", err.message)
+				logger.warn({ err: err.message }, "redis error")
 			})
 		}
 		return _redis
@@ -58,5 +59,15 @@ export function createRedisCache(url: string): Cache {
 				} while (cursor !== "0")
 			} catch {}
 		},
+
+		async ping() {
+			try {
+				const result = await getClient().ping()
+				return result === "PONG"
+			} catch {
+				return false
+			}
+		},
 	}
 }
+

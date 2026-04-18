@@ -3,4 +3,5 @@ export interface Cache {
 	set(key: string, value: unknown, ttlSeconds: number): Promise<void>
 	del(...keys: string[]): Promise<void>
 	delPattern(pattern: string): Promise<void>
+	ping(): Promise<boolean>
 }

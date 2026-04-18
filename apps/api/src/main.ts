@@ -11,8 +11,10 @@ import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins"
 import { onError } from "@orpc/server"
 import { RPCHandler } from "@orpc/server/fetch"
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4"
+import { sql } from "drizzle-orm"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
+import { requestId } from "hono/request-id"
 import { match, P } from "ts-pattern"
 
 import { buildUseCases } from "#/application/use-cases.ts"
@@ -22,7 +24,9 @@ import type { Session } from "#/domain/session/session.ts"
 import { createAuthService } from "#/infrastructure/auth/auth-service.ts"
 import { buildAuth } from "#/infrastructure/auth/better-auth.ts"
 import { createRedisCache } from "#/infrastructure/cache/redis.ts"
+import { env } from "#/infrastructure/config/env.ts"
 import { createDb } from "#/infrastructure/db/client.ts"
+import { logger } from "#/infrastructure/observability/logger.ts"
 import { createActivityRepository } from "#/infrastructure/db/repositories/activity-repository.ts"
 import { createMemberRepository } from "#/infrastructure/db/repositories/member-repository.ts"
 import { createOrganizationRepository } from "#/infrastructure/db/repositories/organization-repository.ts"
@@ -33,7 +37,7 @@ import {
 import { createUserRepository } from "#/infrastructure/db/repositories/user-repository.ts"
 import { buildRouter } from "#/presentation/routers/index.ts"
 
-const db = createDb(process.env.DATABASE_URL!)
+const db = createDb(env.DATABASE_URL)
 
 const activityRepo = createActivityRepository(db)
 const userRepo = createUserRepository(db)
@@ -42,9 +46,7 @@ const orgRepo = createOrganizationRepository(db)
 const roleRepo = createRoleRepository(db)
 const permRepo = createPermissionRepository(db)
 
-const cache = createRedisCache(
-	process.env.REDIS_URL ?? "redis://127.0.0.1:6379",
-)
+const cache = createRedisCache(env.REDIS_URL)
 
 const betterAuthInstance = buildAuth({ db, activityRepo })
 const auth = createAuthService(betterAuthInstance)
@@ -64,7 +66,25 @@ const router = buildRouter(useCases)
 
 const app = new Hono()
 
-const WEB_ORIGIN = process.env.WEB_ORIGIN ?? "http://localhost:3000"
+const WEB_ORIGIN = env.WEB_ORIGIN
+
+app.use("*", requestId())
+
+app.use("*", async (c, next) => {
+	const reqId = c.get("requestId")
+	const start = Date.now()
+	await next()
+	logger.info(
+		{
+			reqId,
+			method: c.req.method,
+			path: c.req.path,
+			status: c.res.status,
+			durMs: Date.now() - start,
+		},
+		"request",
+	)
+})
 
 app.use(
 	"*",
@@ -77,6 +97,22 @@ app.use(
 )
 
 app.get("/healthz", (c) => c.text("ok"))
+
+app.get("/ready", async (c) => {
+	const dbCheck = await db
+		.execute(sql`select 1`)
+		.then(() => true)
+		.catch(() => false)
+	const redisCheck = await cache.ping()
+	const ok = dbCheck && redisCheck
+	return c.json(
+		{
+			status: ok ? "ready" : "unready",
+			checks: { db: dbCheck, redis: redisCheck },
+		},
+		ok ? 200 : 503,
+	)
+})
 
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw))
 
@@ -115,7 +151,7 @@ app.all("/rpc/*", async (c) => {
 const openApiHandler = new OpenAPIHandler(router, {
 	interceptors: [
 		onError((error) => {
-			console.error(error)
+			logger.error({ err: error }, "orpc openapi error")
 		}),
 	],
 	plugins: [
@@ -160,7 +196,7 @@ app.all("/api/*", async (c) => {
 	return matched && response ? response : c.notFound()
 })
 
-const webDistPath = process.env.WEB_DIST_PATH
+const webDistPath = env.WEB_DIST_PATH
 if (webDistPath) {
 	const absDist = resolve(webDistPath)
 	const indexHtmlPath = resolve(absDist, "index.html")
@@ -176,8 +212,8 @@ if (webDistPath) {
 	})
 }
 
-const port = Number(process.env.PORT ?? 3001)
+const port = env.PORT
 
 serve({ fetch: app.fetch, port }, () => {
-	console.log(`api listening on http://localhost:${port}`)
+	logger.info({ port, webOrigin: WEB_ORIGIN }, "api listening")
 })
