@@ -6,7 +6,10 @@ const envSchema = z
 		REDIS_URL: z.string().min(1).default("redis://127.0.0.1:6379"),
 		BETTER_AUTH_SECRET: z
 			.string()
-			.min(16, "BETTER_AUTH_SECRET must be at least 16 chars (use `openssl rand -hex 32`)"),
+			.min(
+				16,
+				"BETTER_AUTH_SECRET must be at least 16 chars (use `openssl rand -hex 32`)",
+			),
 		BETTER_AUTH_URL: z.string().url().default("http://localhost:3000"),
 		WEB_ORIGIN: z.string().url().default("http://localhost:3000"),
 		PORT: z.coerce.number().int().positive().default(3001),
