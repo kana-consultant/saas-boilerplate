@@ -1,7 +1,4 @@
-import type {
-	AppRole,
-	Resource,
-} from "#/domain/role/permissions.ts"
+import type { AppRole, Resource } from "#/domain/role/permissions.ts"
 import { hasPermission } from "#/domain/role/permissions.ts"
 import type {
 	PermissionRepository,
@@ -54,7 +51,8 @@ export function makeCheckPermission(deps: CheckPermissionDeps) {
 		if (!perms) return hasPermission(role, resource, actions)
 		return actions.every((action) =>
 			perms.some(
-				(p) => p.roleId === role && p.resource === resource && p.action === action,
+				(p) =>
+					p.roleId === role && p.resource === resource && p.action === action,
 			),
 		)
 	}
